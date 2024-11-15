@@ -1,0 +1,5 @@
+log:
+  environment: development
+  level: debug
+http_server:
+  address: ":3000"

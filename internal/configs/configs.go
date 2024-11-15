@@ -9,8 +9,14 @@ type SectionLog struct {
 	Environment string `mapstructure:"environment"`
 	Level       string `mapstructure:"level"`
 }
+
+type SectionHTTPServer struct {
+	Address string `mapstructure:"address"`
+}
+
 type ParooConfig struct {
-	Log SectionLog `mapstructure:"log"`
+	Log        SectionLog        `mapstructure:"log"`
+	HTTPServer SectionHTTPServer `mapstructure:"http_server"`
 }
 
 func GetConfig() (ParooConfig, error) {
