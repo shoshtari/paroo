@@ -1,0 +1,49 @@
+name: build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    outputs:
+      version: ${{ steps.detect_version.outputs.version }}
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # - uses: actions/setup-go@v4
+      #   with:
+      #     go-version: '^1.23.2'
+
+
+      - name: version
+        id: detect_version
+        run:  echo "version=0.0.$( git log --oneline | wc -l)" >> "$GITHUB_OUTPUT"
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Docker Image
+        env:
+          VERSION: ${{steps.detect_version.outputs.version}}
+        run: |
+          docker build -t "ghcr.io/shoshtari/paroo:{VERSION}" .
+
+      - name: Push Docker Image
+        env:
+          VERSION: ${{steps.detect_version.outputs.version}}
+        run: |
+          docker push "ghcr.io/shoshtari/paroo:{VERSION}"
