@@ -21,13 +21,20 @@ func TestTelegramBot(t *testing.T) {
 	telegramBot, err := NewTelegramBot(config.Telegram)
 	assert.Nil(t, err)
 
-	messageID, err := telegramBot.SendMessage(NewSendMessageRequest(config.Telegram.ChatID, "salam"))
+	req := NewSendMessageRequest(config.Telegram.ChatID, "salam")
+	messageID, err := telegramBot.SendMessage(req)
 	assert.Nil(t, err)
 	assert.NotZero(t, messageID)
 
-	// err = telegramBot.EditMessage(config.Telegram.ChatID, messageID, "test2")
-	// assert.Nil(t, err)
-	//
-	// err = telegramBot.DeleteMessage(config.Telegram.ChatID, messageID)
-	// assert.Nil(t, err)
+	req2 := EditMessageRequest{
+		SendMessageRequest: &req,
+		MessageID:          messageID,
+	}
+	req2.Text = "salam2"
+
+	err = telegramBot.EditMessage(req2)
+	assert.Nil(t, err)
+
+	err = telegramBot.DeleteMessage(req.ChatID, messageID)
+	assert.Nil(t, err)
 }

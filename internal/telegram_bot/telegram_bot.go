@@ -12,7 +12,7 @@ import (
 
 type TelegramBot interface {
 	SendMessage(SendMessageRequest) (int, error)
-	EditMessage(int, int, string) error
+	EditMessage(EditMessageRequest) error
 	DeleteMessage(int, int) error
 }
 
@@ -30,14 +30,6 @@ func (t TelegramBotImp) getUrl(path string) string {
 // body and resbody can be structs of any kind, function will encode/decode json itself
 func (t TelegramBotImp) getMe() error {
 	return pkg.SendHTTPRequest(t.httpClient, t.getUrl("getMe"), nil, nil)
-}
-
-func (TelegramBotImp) EditMessage(int, int, string) error {
-	panic("unimplemented")
-}
-
-func (TelegramBotImp) DeleteMessage(int, int) error {
-	panic("unimplemented")
 }
 
 func NewTelegramBot(config configs.SectionTelegram) (TelegramBot, error) {
