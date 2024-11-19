@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/configs"
@@ -49,7 +50,7 @@ func (t TelegramBotImp) sendRequest(url string, body any, resbody any) error {
 		return errors.Wrap(err, "couldn't send request")
 	}
 
-	if res.Body != nil {
+	if res.Body != nil && resbody != nil {
 		err = json.NewDecoder(res.Body).Decode(resbody)
 		if err != nil {
 			return errors.Wrap(err, "couldn't decode response")
@@ -63,6 +64,10 @@ func (t TelegramBotImp) sendRequest(url string, body any, resbody any) error {
 	return nil
 
 }
+
+func (t TelegramBotImp) getMe() error {
+	return t.sendRequest(t.getUrl("getMe"), nil, nil)
+}
 func (TelegramBotImp) SendMessage(chatID int, text string) (int, error) {
 	panic("unimplemented")
 }
@@ -75,12 +80,20 @@ func (TelegramBotImp) DeleteMessage(int, int) error {
 	panic("unimplemented")
 }
 
-func NewTelegramBot(config configs.SectionTelegram) TelegramBot {
+func NewTelegramBot(config configs.SectionTelegram) (TelegramBot, error) {
 	var ans TelegramBotImp
 
 	ans.httpClient.Timeout = config.Timeout
+	if config.Proxy != "" {
+		proxyURL, err := url.Parse(config.Proxy)
+		if err != nil {
+			return nil, errors.Wrap(err, "couldn't parse proxy url")
+		}
+		ans.httpClient.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+	}
+
 	ans.baseAddress = config.BaseAddress
 	ans.token = config.Token
 
-	return ans
+	return ans, ans.getMe()
 }
