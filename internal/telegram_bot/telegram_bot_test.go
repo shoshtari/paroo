@@ -18,12 +18,13 @@ func TestMain(m *testing.M) {
 
 func TestTelegramBot(t *testing.T) {
 	config := test.GetTestConfig(t)
-	_, err := NewTelegramBot(config.Telegram)
+	telegramBot, err := NewTelegramBot(config.Telegram)
 	assert.Nil(t, err)
-	//
-	// messageID, err := telegramBot.SendMessage(config.Telegram.ChatID, "test")
-	// assert.Nil(t, err)
-	//
+
+	messageID, err := telegramBot.SendMessage(NewSendMessageRequest(config.Telegram.ChatID, "salam"))
+	assert.Nil(t, err)
+	assert.NotZero(t, messageID)
+
 	// err = telegramBot.EditMessage(config.Telegram.ChatID, messageID, "test2")
 	// assert.Nil(t, err)
 	//

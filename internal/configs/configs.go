@@ -1,7 +1,6 @@
 package configs
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -46,6 +45,5 @@ func GetConfig(configPaths ...string) (ParooConfig, error) {
 	if err := viper.Unmarshal(&ans); err != nil {
 		return ans, errors.Wrap(err, "couldn't unmarshal config")
 	}
-	fmt.Println(ans)
 	return ans, nil
 }
