@@ -5,6 +5,7 @@ import (
 
 	"github.com/shoshtari/paroo/internal"
 	"github.com/shoshtari/paroo/internal/configs"
+	"github.com/shoshtari/paroo/internal/pkg"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +19,7 @@ var runserverCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal("couldn't get config, err: ", err)
 		}
-		logger, err := internal.GetLogger(config.Log)
+		logger, err := pkg.GetLogger(config.Log)
 		if err != nil {
 			log.Fatal("couldn't initialize logger, err: ", err)
 		}

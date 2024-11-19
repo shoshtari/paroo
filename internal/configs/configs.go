@@ -21,6 +21,7 @@ type SectionTelegram struct {
 	Timeout     time.Duration `mapstructure:"timeout"`
 	Token       string        `mapstructure:"token"`
 	Proxy       string        `mapstructure:"proxy"`
+	ChatID      int           `mapstructure:"chat_id"`
 }
 
 type ParooConfig struct {
@@ -29,11 +30,14 @@ type ParooConfig struct {
 	Telegram   SectionTelegram   `mapstructure:"telegram"`
 }
 
-func GetConfig() (ParooConfig, error) {
+func GetConfig(configPaths ...string) (ParooConfig, error) {
 	viper.AddConfigPath("/etc/paroo")
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
+	for _, path := range configPaths {
+		viper.AddConfigPath(path)
+	}
 	var ans ParooConfig
 	if err := viper.ReadInConfig(); err != nil {
 		return ans, errors.Wrap(err, "couldn't read config file")
