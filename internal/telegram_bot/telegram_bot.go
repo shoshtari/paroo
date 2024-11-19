@@ -14,6 +14,7 @@ type TelegramBot interface {
 	SendMessage(SendMessageRequest) (int, error)
 	EditMessage(EditMessageRequest) error
 	DeleteMessage(int, int) error
+	GetUpdates(method string) (chan TelegramUpdate, error)
 }
 
 type TelegramBotImp struct {
@@ -25,9 +26,6 @@ func (t TelegramBotImp) getUrl(path string) string {
 	return fmt.Sprintf("%v/bot%v/%v", t.baseAddress, t.token, path)
 }
 
-// sendRequest will send the request to telegram bot server.
-// if body is nill, it will send a GET else it will be a POST
-// body and resbody can be structs of any kind, function will encode/decode json itself
 func (t TelegramBotImp) getMe() error {
 	return pkg.SendHTTPRequest(t.httpClient, t.getUrl("getMe"), nil, nil)
 }
