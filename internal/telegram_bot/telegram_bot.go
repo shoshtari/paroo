@@ -14,7 +14,7 @@ type TelegramBot interface {
 	SendMessage(SendMessageRequest) (int, error)
 	EditMessage(EditMessageRequest) error
 	DeleteMessage(int, int) error
-	GetUpdates(method string) (chan TelegramUpdate, error)
+	GetUpdatesChan(method string) (<-chan TelegramUpdate, <-chan error)
 }
 
 type TelegramBotImp struct {

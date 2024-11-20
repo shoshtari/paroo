@@ -1,8 +1,7 @@
 package telegrambot
 
 import (
-	"errors"
-
+	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/pkg"
 )
 
@@ -50,7 +49,7 @@ func WithReplyKeybord(request SendMessageRequest, replyKeybord [][]string) SendM
 
 func (t TelegramBotImp) SendMessage(request SendMessageRequest) (int, error) {
 	if request.ChatID == 0 || request.Text == "" {
-		return -1, pkg.BadRequestError
+		return -1, errors.Wrap(pkg.BadRequestError, "chat id and text is needed")
 	}
 	var res SendMessageResponse
 	err := pkg.SendHTTPRequest(t.httpClient, t.getUrl("sendMessage"), request, &res)

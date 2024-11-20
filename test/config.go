@@ -3,19 +3,19 @@ package test
 import (
 	"os"
 	"path"
-	"testing"
 
 	"github.com/shoshtari/paroo/internal/configs"
-	"github.com/stretchr/testify/assert"
 )
 
-func GetTestConfig(t *testing.T) configs.ParooConfig {
+func GetTestConfig() configs.ParooConfig {
 	pwd := os.Getenv("PWD")
 	currentPath := pwd
 	running := true
 	for running {
 		files, err := os.ReadDir(currentPath)
-		assert.Nil(t, err)
+		if err != nil {
+			panic(err)
+		}
 		for _, file := range files {
 			if file.Name() == "go.mod" {
 				running = false
@@ -29,6 +29,8 @@ func GetTestConfig(t *testing.T) configs.ParooConfig {
 	}
 	currentPath = path.Join(currentPath, "test")
 	res, err := configs.GetConfig(currentPath)
-	assert.Nil(t, err)
+	if err != nil {
+		panic(err)
+	}
 	return res
 }
