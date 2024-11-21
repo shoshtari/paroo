@@ -38,13 +38,17 @@ jobs:
               sort -V | \
               tail -n 1)
 
-          echo "Last version is $LAST_TAG"
           echo "last_tag=$LAST_TAG" >> $GITHUB_ENV
 
       - name: increment patch version
         run: |
           IFS='.' read -r major minor patch <<< "${{ env.last_tag }}"
-          new_tag="v${major}.${minor}.$((patch + 1))"
+          if [[ -z ${{ env.last_tag }} ]]; then
+            new_tag="v0.0.1"
+          else
+            new_tag="v${major}.${minor}.$((patch + 1))"
+          fi
+          echo "new version is $new_tag"
           echo "new_tag=$new_tag" >> $GITHUB_ENV
 
       - name: Login to GitHub Container Registry
