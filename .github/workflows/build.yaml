@@ -2,9 +2,9 @@ name: build
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ "test-workflow" ]
+  # pull_request:
+  #   branches: [ "main" ]
 
   workflow_dispatch:
 
@@ -43,7 +43,7 @@ jobs:
 
       - name: increment patch version
         run: |
-          IFS='.' read -r major minor patch <<< "${{ env.last_tag#v }}"
+          IFS='.' read -r major minor patch <<< "${{ env.last_tag }}"
           new_tag="v${major}.${minor}.$((patch + 1))"
           echo "new_tag=$new_tag" >> $GITHUB_ENV
 
