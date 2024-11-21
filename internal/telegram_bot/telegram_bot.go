@@ -18,8 +18,9 @@ type TelegramBot interface {
 }
 
 type TelegramBotImp struct {
-	httpClient         http.Client
-	baseAddress, token string
+	httpClient           http.Client
+	baseAddress, token   string
+	lastRecievedUpdateID int
 }
 
 func (t TelegramBotImp) getUrl(path string) string {

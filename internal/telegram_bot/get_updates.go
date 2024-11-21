@@ -2,28 +2,32 @@ package telegrambot
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/shoshtari/paroo/internal/pkg"
 )
 
 type TelegramUpdate struct {
-	MessageID int `json:"message_id"`
-	From      struct {
-		ID        int    `json:"id"`
-		IsBot     bool   `json:"is_bot"`
-		FirstName string `json:"first_name"`
-		Username  string `json:"username"`
-	} `json:"from"`
+	UpdateID int `json:"update_id"`
+	Message  struct {
+		MessageID int `json:"message_id"`
+		From      struct {
+			ID        int    `json:"id"`
+			IsBot     bool   `json:"is_bot"`
+			FirstName string `json:"first_name"`
+			Username  string `json:"username"`
+		} `json:"from"`
 
-	Chat struct {
-		ID    int    `json:"id"`
-		Title string `json:"title"`
-		Type  string `json:"type"`
-	} `json:"chat"`
-	Date     int    `json:"date"`
-	EditDate int    `json:"edit_date"`
-	Text     string `json:"text"`
+		Chat struct {
+			ID    int    `json:"id"`
+			Title string `json:"title"`
+			Type  string `json:"type"`
+		} `json:"chat"`
+		Date     int    `json:"date"`
+		EditDate int    `json:"edit_date" `
+		Text     string `json:"text"`
+	} `json:"message"`
 }
 type telegramGetUpdateResponse struct {
 	Ok     bool             `json:"ok"`
@@ -37,7 +41,9 @@ func (t TelegramBotImp) getUpdates() (<-chan TelegramUpdate, <-chan error) {
 		ticker := time.NewTicker(time.Millisecond)
 		for range ticker.C {
 			var res telegramGetUpdateResponse
-			err := pkg.SendHTTPRequest(t.httpClient, t.getUrl("getUpdates"), nil, &res)
+			url := t.getUrl("getUpdates")
+			url = fmt.Sprintf("%v?offset=%d", url, t.lastRecievedUpdateID)
+			err := pkg.SendHTTPRequest(t.httpClient, url, nil, &res)
 			if err != nil {
 				errChan <- err
 			}
@@ -46,6 +52,7 @@ func (t TelegramBotImp) getUpdates() (<-chan TelegramUpdate, <-chan error) {
 			}
 			for _, update := range res.Result {
 				updateChan <- update
+				t.lastRecievedUpdateID = update.UpdateID + 1
 			}
 
 		}
