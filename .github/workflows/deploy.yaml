@@ -26,7 +26,7 @@ jobs:
 
       - name: set tag
         run: |
-          old_tag=$(git log --oneline | head -n 1 | cut -d " " -f 1)
+          old_tag=dev$(git log --oneline | head -n 1 | cut -d " " -f 1)
           new_tag=$(git tag | sort -V | tail -n 1 )
           echo "old_tag=$old_tag" >> $GITHUB_ENV
           echo "new_tag=$new_tag" >> $GITHUB_ENV
