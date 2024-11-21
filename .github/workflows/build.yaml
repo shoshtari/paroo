@@ -43,7 +43,7 @@ jobs:
       - name: increment patch version
         run: |
           IFS='.' read -r major minor patch <<< "${{ env.last_tag }}"
-          if [[ -z ${{ env.last_tag }} ]]; then
+          if [ -z ${{ env.last_tag }} ]; then
             new_tag="v0.0.1"
           else
             new_tag="v${major}.${minor}.$((patch + 1))"
