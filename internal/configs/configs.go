@@ -24,10 +24,17 @@ type SectionTelegram struct {
 	ChatID      int           `mapstructure:"chat_id"`
 }
 
+type SectionWallex struct {
+	BaseAddress string        `mapstructure:"base_address"`
+	Token       string        `mapstructure:"token"`
+	Timeout     time.Duration `mapstructure:"timeout"`
+}
+
 type ParooConfig struct {
 	Log        SectionLog        `mapstructure:"log"`
 	HTTPServer SectionHTTPServer `mapstructure:"http_server"`
 	Telegram   SectionTelegram   `mapstructure:"telegram"`
+	Wallex     SectionWallex     `mapstructure:"wallex"`
 }
 
 func GetConfig(configPaths ...string) (ParooConfig, error) {
