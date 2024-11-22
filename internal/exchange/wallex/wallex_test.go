@@ -24,6 +24,12 @@ func TestMain(m *testing.M) {
 
 // func TestBalance(t *testing.T) {
 // 	balance, err := wallexClient.GetTotalBalance()
-// 	assert.NotNil(t, err)
-// 	assert.NotZero(t, balance)
+// 	assert.Nil(t, err)
+// 	assert.False(t, balance.Equal(decimal.Zero))
+// }
+
+// func TestMarketStat(t *testing.T) {
+// 	stats, err := wallexClient.GetMarketsStats()
+// 	assert.Nil(t, err)
+// 	assert.NotNil(t, stats)
 // }

@@ -30,6 +30,18 @@ type SectionWallex struct {
 	Timeout     time.Duration `mapstructure:"timeout"`
 }
 
+type SectionPostgres struct {
+	Host            string        `mapstructure:"host"`
+	User            string        `mapstructure:"host"`
+	Pass            string        `mapstructure:"host"`
+	Database        string        `mapstructure:"host"`
+	Port            uint16        `mapstructure:"int"`
+	ConnMaxIdleTime time.Duration `mapstructure:"conn_max_idle_time"`
+	ConnMaxTime     time.Duration `mapstructure:"conn_max_time"`
+	MaxConn         int32         `mapstructure:"max_conn"`
+	MinConn         int32         `mapstructure:"min_conn"`
+}
+
 type ParooConfig struct {
 	Log        SectionLog        `mapstructure:"log"`
 	HTTPServer SectionHTTPServer `mapstructure:"http_server"`
