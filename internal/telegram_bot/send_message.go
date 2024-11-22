@@ -11,7 +11,7 @@ type InlineKeybordButton struct {
 }
 
 type ReplyMarkup struct {
-	ReplyKeybord  [][]string              `json:"reply_keyboard,omitempty"`
+	ReplyKeybord  [][]string              `json:"keyboard,omitempty"`
 	InlineKeybord [][]InlineKeybordButton ` json:"inline_keyboard,omitempty"`
 }
 
@@ -35,16 +35,22 @@ func NewSendMessageRequest(chatID int, text string) SendMessageRequest {
 	}
 }
 
-func WithInlineKeybord(request SendMessageRequest, inlineKeybord [][]InlineKeybordButton) SendMessageRequest {
-	request.ReplyMarkup.ReplyKeybord = nil
-	request.ReplyMarkup.InlineKeybord = inlineKeybord
-	return request
+func (r *SendMessageRequest) WithInlineKeybord(inlineKeybord [][]InlineKeybordButton) SendMessageRequest {
+	if r.ReplyMarkup == nil {
+		r.ReplyMarkup = &ReplyMarkup{}
+	}
+	r.ReplyMarkup.ReplyKeybord = nil
+	r.ReplyMarkup.InlineKeybord = inlineKeybord
+	return *r
 }
 
-func WithReplyKeybord(request SendMessageRequest, replyKeybord [][]string) SendMessageRequest {
-	request.ReplyMarkup.InlineKeybord = nil
-	request.ReplyMarkup.ReplyKeybord = replyKeybord
-	return request
+func (r *SendMessageRequest) WithReplyKeybord(replyKeybord [][]string) SendMessageRequest {
+	if r.ReplyMarkup == nil {
+		r.ReplyMarkup = &ReplyMarkup{}
+	}
+	r.ReplyMarkup.InlineKeybord = nil
+	r.ReplyMarkup.ReplyKeybord = replyKeybord
+	return *r
 }
 
 func (t TelegramBotImp) SendMessage(request SendMessageRequest) (int, error) {

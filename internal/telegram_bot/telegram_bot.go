@@ -21,6 +21,7 @@ type TelegramBotImp struct {
 	httpClient           http.Client
 	baseAddress, token   string
 	lastRecievedUpdateID int
+	getUpdateTimeout     int
 }
 
 func (t TelegramBotImp) getUrl(path string) string {
@@ -45,6 +46,7 @@ func NewTelegramBot(config configs.SectionTelegram) (TelegramBot, error) {
 
 	ans.baseAddress = config.BaseAddress
 	ans.token = config.Token
+	ans.getUpdateTimeout = config.GetUpdateTimeout
 
 	return ans, ans.getMe()
 }

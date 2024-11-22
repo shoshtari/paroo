@@ -1,6 +1,8 @@
 package configs
 
 import (
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -17,11 +19,12 @@ type SectionHTTPServer struct {
 }
 
 type SectionTelegram struct {
-	BaseAddress string        `mapstructure:"base_address"`
-	Timeout     time.Duration `mapstructure:"timeout"`
-	Token       string        `mapstructure:"token"`
-	Proxy       string        `mapstructure:"proxy"`
-	ChatID      int           `mapstructure:"chat_id"`
+	BaseAddress      string        `mapstructure:"base_address"`
+	Timeout          time.Duration `mapstructure:"timeout"`
+	Token            string        `mapstructure:"token"`
+	Proxy            string        `mapstructure:"proxy"`
+	ChatID           int           `mapstructure:"chat_id"`
+	GetUpdateTimeout int           `mapstructure:"get_update_timeout"`
 }
 
 type SectionWallex struct {
@@ -57,6 +60,29 @@ type ParooConfig struct {
 	Database   SectionDatabase   `mapstructure:"database"`
 }
 
+func bindEnv(typ reflect.Type, parentpath string) error {
+	var basePath string
+	if parentpath != "" {
+		basePath = parentpath + "."
+	}
+
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		fieldPath := strings.ToLower(basePath + field.Tag.Get("mapstructure"))
+		if field.Type.Kind() == reflect.Struct {
+			if err := bindEnv(field.Type, fieldPath); err != nil {
+				return err
+			}
+		} else {
+			if err := viper.BindEnv(fieldPath); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+
+}
+
 func GetConfig(configPaths ...string) (ParooConfig, error) {
 	viper.AddConfigPath("/etc/paroo")
 	viper.AddConfigPath(".")
@@ -69,7 +95,12 @@ func GetConfig(configPaths ...string) (ParooConfig, error) {
 	if err := viper.ReadInConfig(); err != nil {
 		return ans, errors.Wrap(err, "couldn't read config file")
 	}
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	if err := bindEnv(reflect.TypeOf(&ans).Elem(), ""); err != nil {
+		return ans, errors.Wrap(err, "couldn't bind env")
+	}
 	if err := viper.Unmarshal(&ans); err != nil {
+
 		return ans, errors.Wrap(err, "couldn't unmarshal config")
 	}
 	return ans, nil

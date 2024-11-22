@@ -42,7 +42,7 @@ func (t TelegramBotImp) getUpdates() (<-chan TelegramUpdate, <-chan error) {
 		for range ticker.C {
 			var res telegramGetUpdateResponse
 			url := t.getUrl("getUpdates")
-			url = fmt.Sprintf("%v?offset=%d", url, t.lastRecievedUpdateID)
+			url = fmt.Sprintf("%v?offset=%d&timeout=%d", url, t.lastRecievedUpdateID, t.getUpdateTimeout)
 			err := pkg.SendHTTPRequest(t.httpClient, url, nil, &res)
 			if err != nil {
 				errChan <- err

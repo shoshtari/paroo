@@ -37,5 +37,13 @@ func InitializeLogger(config configs.SectionLog) error {
 }
 
 func GetLogger() *zap.Logger {
+	if logger == nil {
+		logger, err := zap.NewDevelopment()
+		if err != nil {
+			panic(err)
+
+		}
+		return logger
+	}
 	return logger
 }

@@ -7,15 +7,53 @@ import (
 	"context"
 	"log"
 
+	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/configs"
 	"github.com/shoshtari/paroo/internal/core"
 	"github.com/shoshtari/paroo/internal/exchange/wallex"
 	"github.com/shoshtari/paroo/internal/pkg"
-	"github.com/shoshtari/paroo/internal/repositories/postgres"
+	"github.com/shoshtari/paroo/internal/repositories"
+	postgresRepo "github.com/shoshtari/paroo/internal/repositories/postgres"
+
+	sqliteRepo "github.com/shoshtari/paroo/internal/repositories/sqlite"
 	telegrambot "github.com/shoshtari/paroo/internal/telegram_bot"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 )
+
+func GetRepos(config configs.SectionDatabase) (marketRepo repositories.MarketRepo, err error) {
+
+	if config.Provider == "" {
+		if config.Postgres.Host != "" {
+			config.Provider = "postgres"
+		} else {
+			config.Provider = "sqlite"
+		}
+	}
+
+	switch config.Provider {
+	case "postgres":
+		ctx := context.Background()
+		pgconn, err2 := postgresRepo.ConnectPostgres(ctx, config.Postgres)
+		if err != nil {
+			err = errors.Wrap(err2, "couldn't connect to postgres")
+			return
+		}
+
+		marketRepo, err2 = postgresRepo.NewMarketRepo(pgconn, ctx)
+		if err2 != nil {
+			err = errors.Wrap(err, "couldn't make markets repo")
+			return
+		}
+		return
+
+	case "sqlite":
+		marketRepo, err = sqliteRepo.NewMarketRepo(config.Sqlite)
+		return
+	}
+	return marketRepo, err
+
+}
 
 // runtgbotCmd represents the runtgbot command
 var runtgbotCmd = &cobra.Command{
@@ -34,16 +72,9 @@ var runtgbotCmd = &cobra.Command{
 		}
 
 		logger := pkg.GetLogger()
-
-		ctx := context.Background()
-		pgconn, err := postgres.ConnectPostgres(ctx, config.Database.Postgres)
+		marketsRepo, err := GetRepos(config.Database)
 		if err != nil {
-			logger.Fatal("couldn't connect to postgres", zap.Error(err))
-		}
-
-		marketsRepo, err := postgres.NewMarketRepo(pgconn, ctx)
-		if err != nil {
-			logger.Fatal("couldn't make markets repo", zap.Error(err))
+			logger.Fatal("couldn't get repos", zap.Error(err))
 		}
 
 		wallexClient, err := wallex.NewWallexClient(config.Wallex, marketsRepo)

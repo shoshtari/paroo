@@ -1,5 +1,28 @@
 log:
   environment: development
   level: debug
+
 http_server:
   address: ":3000"
+
+telegram:
+  base_address: "https://api.telegram.org"
+  proxy: "socks5h://localhost:9999"
+  token: ""
+  chat_id: 1
+  get_update_timeout: 100
+
+wallex:
+  base_address: "https://api.wallex.ir/v1"
+  token: ""
+
+postgres:
+  host: localhost
+  port: 5432
+  user: postgres
+  pass: password
+  min_conn: 1
+  max_conn: 10
+  conn_max_idle_time: 10m
+  database: postgres
+  conn_max_time: 1h

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 type header struct {
@@ -23,6 +24,8 @@ func WithHeader(key, val string) header {
 }
 
 func SendHTTPRequest(httpClient http.Client, url string, reqbody any, resbody any, headers ...header) error {
+	logger := GetLogger().With(zap.String("module", "pkg"), zap.String("method", "send http request"))
+
 	method := http.MethodPost
 	if reqbody == nil {
 		method = http.MethodGet
@@ -32,6 +35,7 @@ func SendHTTPRequest(httpClient http.Client, url string, reqbody any, resbody an
 	if err != nil {
 		return errors.Wrap(err, "couldn't json marshal request")
 	}
+	logger.Debug("request body: " + string(encodedBody))
 
 	req, err := http.NewRequest(method, url, bytes.NewReader(encodedBody))
 	if err != nil {
@@ -54,7 +58,7 @@ func SendHTTPRequest(httpClient http.Client, url string, reqbody any, resbody an
 		if err != nil {
 			return errors.Wrap(err, "couldn't read response")
 		}
-
+		logger.Debug("response body: " + string(resdata))
 	}
 
 	if res.StatusCode != http.StatusOK {
