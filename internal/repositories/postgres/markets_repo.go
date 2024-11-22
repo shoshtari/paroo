@@ -23,6 +23,7 @@ func (m MarketsRepoImp) migrate(ctx context.Context) error {
 			base_asset varchar(50),
 			quote_asset varchar(50),
 			UNIQUE(exchange_name, base_asset, quote_asset)
+		)
 		`
 	_, err := m.pool.Exec(ctx, stmt)
 	return err

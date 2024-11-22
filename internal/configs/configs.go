@@ -32,10 +32,10 @@ type SectionWallex struct {
 
 type SectionPostgres struct {
 	Host            string        `mapstructure:"host"`
-	User            string        `mapstructure:"host"`
-	Pass            string        `mapstructure:"host"`
-	Database        string        `mapstructure:"host"`
-	Port            uint16        `mapstructure:"int"`
+	Port            uint16        `mapstructure:"port"`
+	Database        string        `mapstructure:"database"`
+	User            string        `mapstructure:"user"`
+	Pass            string        `mapstructure:"pass"`
 	ConnMaxIdleTime time.Duration `mapstructure:"conn_max_idle_time"`
 	ConnMaxTime     time.Duration `mapstructure:"conn_max_time"`
 	MaxConn         int32         `mapstructure:"max_conn"`
@@ -47,6 +47,7 @@ type ParooConfig struct {
 	HTTPServer SectionHTTPServer `mapstructure:"http_server"`
 	Telegram   SectionTelegram   `mapstructure:"telegram"`
 	Wallex     SectionWallex     `mapstructure:"wallex"`
+	Postgres   SectionPostgres   `mapstructure:"postgres"`
 }
 
 func GetConfig(configPaths ...string) (ParooConfig, error) {

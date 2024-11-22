@@ -22,11 +22,11 @@ type ListMarketResponse struct {
 	} `json:"result"`
 }
 
-func (WallexClientImp) GetMarkets() ([]pkg.Market, error) {
+func (wallexClientImp) GetMarkets() ([]pkg.Market, error) {
 	panic("unimplemented")
 }
 
-func (w WallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
+func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 	var res ListMarketResponse
 	if err := w.sendReq("markets", nil, &res); err != nil {
 		return nil, errors.Wrap(err, "couldn't send request")

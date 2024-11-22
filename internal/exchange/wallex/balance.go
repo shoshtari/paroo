@@ -17,7 +17,7 @@ type BalanceDetailResponse struct {
 	} `json:"result"`
 }
 
-func (w WallexClientImp) GetTotalBalance() (decimal.Decimal, error) {
+func (w wallexClientImp) GetTotalBalance() (decimal.Decimal, error) {
 	var wallexRes BalanceDetailResponse
 	if err := w.sendReq("account/balances-detail", nil, &wallexRes); err != nil {
 		return decimal.Zero, errors.Wrap(err, "couldn't send request")

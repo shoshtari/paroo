@@ -6,6 +6,7 @@ import (
 
 	"github.com/shoshtari/paroo/internal/configs"
 	"github.com/shoshtari/paroo/internal/exchange"
+	"github.com/shoshtari/paroo/internal/repositories/sqlite"
 	"github.com/shoshtari/paroo/test"
 )
 
@@ -15,7 +16,13 @@ var config configs.ParooConfig
 func TestMain(m *testing.M) {
 	var err error
 	config = test.GetTestConfig()
-	wallexClient, err = NewWallexClient(config.Wallex)
+
+	marketRepo, err := sqlite.NewMarketRepo(":memory:")
+	if err != nil {
+		panic(err)
+	}
+
+	wallexClient, err = NewWallexClient(config.Wallex, marketRepo)
 	if err != nil {
 		panic(err)
 	}

@@ -9,6 +9,7 @@ import (
 )
 
 func ConnectPostgres(ctx context.Context, config configs.SectionPostgres) (*pgxpool.Pool, error) {
+
 	cfg, _ := pgxpool.ParseConfig("")
 	cfg.ConnConfig.Host = config.Host
 	cfg.ConnConfig.Port = config.Port
