@@ -4,11 +4,14 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"context"
 	"log"
 
 	"github.com/shoshtari/paroo/internal/configs"
 	"github.com/shoshtari/paroo/internal/core"
+	"github.com/shoshtari/paroo/internal/exchange/wallex"
 	"github.com/shoshtari/paroo/internal/pkg"
+	"github.com/shoshtari/paroo/internal/repositories/postgres"
 	telegrambot "github.com/shoshtari/paroo/internal/telegram_bot"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -24,16 +27,37 @@ var runtgbotCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal("couldn't get config, err: ", err)
 		}
-		logger, err := pkg.GetLogger(config.Log)
+
+		err = pkg.InitializeLogger(config.Log)
 		if err != nil {
 			log.Fatal("couldn't initialize logger, err: ", err)
+		}
+
+		logger := pkg.GetLogger()
+
+		ctx := context.Background()
+		pgconn, err := postgres.ConnectPostgres(ctx, config.Database.Postgres)
+		if err != nil {
+			logger.Fatal("couldn't connect to postgres", zap.Error(err))
+		}
+
+		marketsRepo, err := postgres.NewMarketRepo(pgconn, ctx)
+		if err != nil {
+			logger.Fatal("couldn't make markets repo", zap.Error(err))
+		}
+
+		wallexClient, err := wallex.NewWallexClient(config.Wallex, marketsRepo)
+		if err != nil {
+			logger.Fatal("couldn't connect to wallex", zap.Error(err))
 		}
 
 		tgbot, err := telegrambot.NewTelegramBot(config.Telegram)
 		if err != nil {
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}
-		parooCore := core.NewParooCode(tgbot)
+		parooCore := core.NewParooCode(tgbot, wallexClient)
+
+		logger.Info("All dependencies initialized, starting the core")
 		if err := parooCore.Start(); err != nil {
 			logger.Fatal("error on running paroo", zap.Error(err))
 		}

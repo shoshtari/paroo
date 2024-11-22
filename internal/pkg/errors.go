@@ -3,6 +3,8 @@ package pkg
 import "errors"
 
 var (
-	BadRequestError    = errors.New("bad request")
-	UnknownMethodError = errors.New("method is unknown")
+	BadRequestError     = errors.New("bad request")
+	UnknownMethodError  = errors.New("method is unknown")
+	InternalError       = errors.New("internal error")
+	NotImplementedError = errors.New("unimplemented")
 )

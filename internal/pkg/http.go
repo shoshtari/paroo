@@ -10,7 +10,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-func SendHTTPRequest(httpClient http.Client, url string, reqbody any, resbody any) error {
+type header struct {
+	key string
+	val string
+}
+
+func WithHeader(key, val string) header {
+	return header{
+		key: key,
+		val: val,
+	}
+}
+
+func SendHTTPRequest(httpClient http.Client, url string, reqbody any, resbody any, headers ...header) error {
 	method := http.MethodPost
 	if reqbody == nil {
 		method = http.MethodGet
@@ -26,6 +38,9 @@ func SendHTTPRequest(httpClient http.Client, url string, reqbody any, resbody an
 		return errors.Wrap(err, "couldn't create request")
 	}
 	req.Header.Set("Content-Type", "application/json")
+	for _, header := range headers {
+		req.Header.Set(header.key, header.val)
+	}
 
 	res, err := httpClient.Do(req)
 	if err != nil {

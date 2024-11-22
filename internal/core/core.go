@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 
+	"github.com/shoshtari/paroo/internal/exchange"
 	telegrambot "github.com/shoshtari/paroo/internal/telegram_bot"
 )
 
@@ -11,7 +12,8 @@ type ParooCore interface {
 }
 
 type ParooCoreImp struct {
-	tgbot telegrambot.TelegramBot
+	tgbot        telegrambot.TelegramBot
+	wallexClient exchange.Exchange
 }
 
 func (p ParooCoreImp) Start() error {
@@ -26,8 +28,9 @@ func (p ParooCoreImp) Start() error {
 	}
 }
 
-func NewParooCode(tgbot telegrambot.TelegramBot) ParooCore {
+func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange) ParooCore {
 	return ParooCoreImp{
-		tgbot: tgbot,
+		tgbot:        tgbot,
+		wallexClient: wallexClient,
 	}
 }
