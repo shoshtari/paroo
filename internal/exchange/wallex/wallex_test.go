@@ -1,14 +1,15 @@
-package exchange
+package wallex
 
 import (
 	"os"
 	"testing"
 
 	"github.com/shoshtari/paroo/internal/configs"
+	"github.com/shoshtari/paroo/internal/exchange"
 	"github.com/shoshtari/paroo/test"
 )
 
-var wallexClient Exchange
+var wallexClient exchange.Exchange
 var config configs.ParooConfig
 
 func TestMain(m *testing.M) {

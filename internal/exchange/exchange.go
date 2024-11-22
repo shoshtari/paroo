@@ -44,9 +44,6 @@ type MarketState struct {
 	SellPrice decimal.Decimal
 	BuyPrice  decimal.Decimal
 
-	BuyOrders  []Order
-	SellOrders []Order
-
 	Date time.Time
 }
 

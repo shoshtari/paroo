@@ -1,12 +1,12 @@
-package exchange
+package wallex
 
 import (
 	"fmt"
 	"net/http"
 
 	"github.com/pkg/errors"
-	"github.com/shopspring/decimal"
 	"github.com/shoshtari/paroo/internal/configs"
+	"github.com/shoshtari/paroo/internal/exchange"
 	"github.com/shoshtari/paroo/internal/pkg"
 )
 
@@ -25,22 +25,7 @@ func (w WallexClientImp) getProfile() error {
 	return w.sendReq("account/profile", nil, nil)
 }
 
-// GetMarketState implements Exchange.
-func (WallexClientImp) GetMarketState(market Market) (MarketState, error) {
-	panic("unimplemented")
-}
-
-// GetMarkets implements Exchange.
-func (WallexClientImp) GetMarkets() ([]Market, error) {
-	panic("unimplemented")
-}
-
-// GetTotalBalance implements Exchange.
-func (WallexClientImp) GetTotalBalance() (decimal.Decimal, error) {
-	panic("unimplemented")
-}
-
-func NewWallexClient(config configs.SectionWallex) (Exchange, error) {
+func NewWallexClient(config configs.SectionWallex) (exchange.Exchange, error) {
 	if config.Token == "" {
 		return nil, errors.Wrap(pkg.BadRequestError, "token cannot be empty")
 	}
