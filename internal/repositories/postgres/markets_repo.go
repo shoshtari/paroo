@@ -4,12 +4,10 @@ import (
 	"context"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/pkg"
+	"github.com/shoshtari/paroo/internal/repositories"
 )
-
-type MarketRepo interface {
-	Insert(context.Context, pkg.Market) (int, error)
-}
 
 type MarketsRepoImp struct {
 	pool *pgxpool.Pool
@@ -30,12 +28,14 @@ func (m MarketsRepoImp) migrate(ctx context.Context) error {
 
 }
 
-func (m MarketsRepoImp) Insert(ctx context.Context, market pkg.Market) (int, error) {
+func (m MarketsRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int, error) {
 	stmt := `
 		INSERT INTO markets(
 			exchange_name,
 			base_asset,
 			quote_asset
+		) VALUES (
+			$1, $2, $3
 		) RETURNING id ON CONFLICT DO NOTHING
 		`
 	var marketID int
@@ -49,7 +49,39 @@ func (m MarketsRepoImp) Insert(ctx context.Context, market pkg.Market) (int, err
 
 }
 
-func NewMarketRepo(pool *pgxpool.Pool, ctx context.Context) (MarketRepo, error) {
+func (m MarketsRepoImp) GetAllExchangeMarkets(ctx context.Context, exchangeName string) ([]pkg.Market, error) {
+	stmt := `SELECT id, base_asset, quote_asset FROM markets WHERE exchange_name = $1`
+	rows, err := m.pool.Query(ctx, stmt)
+	if err != nil {
+		return nil, errors.Wrap(err, "couldn't get rows")
+	}
+
+	var markets []pkg.Market
+	for rows.Next() {
+		var market pkg.Market
+		if err = rows.Scan(&market.ID, &market.BaseAsset, &market.QuoteAsset); err != nil {
+			return nil, errors.Wrap(err, "couldn't scan to market")
+		}
+		market.ExchangeName = exchangeName
+		markets = append(markets, market)
+	}
+	return markets, nil
+}
+
+func (m MarketsRepoImp) GetByID(ctx context.Context, marketID int) (pkg.Market, error) {
+	stmt := `SELECT exchange_name, base_asset, quote_asset FROM markets WHERE id = $1`
+	var ans pkg.Market
+	ans.ID = marketID
+
+	err := m.pool.QueryRow(ctx, stmt).Scan(&ans.ExchangeName, &ans.BaseAsset, &ans.QuoteAsset)
+	if err != nil {
+		return ans, errors.Wrap(err, "couldn't get data from db")
+	}
+
+	return ans, nil
+}
+
+func NewMarketRepo(pool *pgxpool.Pool, ctx context.Context) (repositories.MarketRepo, error) {
 	ans := MarketsRepoImp{
 		pool: pool,
 	}

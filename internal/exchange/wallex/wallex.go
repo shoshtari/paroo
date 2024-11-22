@@ -18,6 +18,8 @@ type wallexClientImp struct {
 	marketsRepo repositories.MarketRepo
 }
 
+const exchangeName = "wallex"
+
 func (w wallexClientImp) sendReq(path string, reqbody any, resbody any) error {
 	url := fmt.Sprintf("%v/%v", w.baseAddress, path)
 	return pkg.SendHTTPRequest(w.httpClient, url, reqbody, resbody, pkg.WithHeader("Authorization", w.token))

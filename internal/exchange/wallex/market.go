@@ -1,7 +1,8 @@
 package wallex
 
 import (
-	"fmt"
+	"context"
+	"time"
 
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
@@ -22,8 +23,8 @@ type ListMarketResponse struct {
 	} `json:"result"`
 }
 
-func (wallexClientImp) GetMarkets() ([]pkg.Market, error) {
-	panic("unimplemented")
+func (w wallexClientImp) GetMarkets() ([]pkg.Market, error) {
+	return w.marketsRepo.GetAllExchangeMarkets(context.Background(), exchangeName)
 }
 
 func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
@@ -34,10 +35,29 @@ func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 	if !res.Success {
 		return nil, pkg.InternalError
 	}
-	for _, symbol := range res.Result.Symbols {
-		fmt.Println(symbol)
 
+	var stats []pkg.MarketStat
+	for _, symbol := range res.Result.Symbols {
+		market := pkg.Market{
+			ExchangeName: exchangeName,
+			BaseAsset:    symbol.BaseAsset,
+			QuoteAsset:   symbol.QuoteAsset,
+		}
+		var err error
+
+		market.ID, err = w.marketsRepo.GetOrCreate(context.TODO(), market)
+		if err != nil {
+			return nil, errors.Wrap(err, "couldn't insert market to db")
+		}
+
+		marketStat := pkg.MarketStat{
+			MarketID:  market.ID,
+			BuyPrice:  symbol.Stats.BuyPrice,
+			SellPrice: symbol.Stats.SellPrice,
+			Date:      time.Now(),
+		}
+		stats = append(stats, marketStat)
 	}
 
-	return nil, pkg.NotImplementedError
+	return stats, nil
 }

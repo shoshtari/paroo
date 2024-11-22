@@ -1,11 +1,12 @@
 package wallex
 
 import (
-	"fmt"
+	"context"
 
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"github.com/shoshtari/paroo/internal/pkg"
+	"go.uber.org/zap"
 )
 
 type BalanceDetailResponse struct {
@@ -27,13 +28,37 @@ func (w wallexClientImp) GetTotalBalance() (decimal.Decimal, error) {
 		return decimal.Zero, pkg.InternalError
 	}
 
+	stats, err := w.GetMarketsStats()
+	if err != nil {
+		return decimal.Zero, errors.Wrap(err, "couldn't get market stats")
+	}
+	marketPrices := make(map[string]decimal.Decimal)
+	marketPrices["TMN"] = decimal.NewFromInt(1)
+	for _, stat := range stats {
+		market, err := w.marketsRepo.GetByID(context.Background(), stat.MarketID)
+		if err != nil {
+			return decimal.Zero, errors.Wrap(err, "couldn't get market")
+		}
+		if market.QuoteAsset != "TMN" {
+			continue
+		}
+
+		marketPrices[market.BaseAsset] = stat.BuyPrice
+	}
+
+	ans := decimal.Zero
 	for _, asset := range wallexRes.Result {
 		if asset.Total.Equal(decimal.Zero) {
 			continue
 		}
-		fmt.Println(asset.Symbol, asset.Total)
+
+		price, exists := marketPrices[asset.Symbol]
+		if !exists {
+			pkg.GetLogger().With(zap.String("symbol", asset.Symbol)).Warn("there was a symbol in portfolio without equivalent in stats")
+			continue
+		}
+		ans = ans.Add(price.Mul(asset.Total))
 	}
 
-	return decimal.Zero, pkg.BadRequestError
-
+	return ans, nil
 }

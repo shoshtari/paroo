@@ -13,8 +13,7 @@ type marketRepoImp struct {
 	db *sql.DB
 }
 
-// Insert implements repositories.MarketRepo.
-func (m marketRepoImp) Insert(_ context.Context, market pkg.Market) (int, error) {
+func (m marketRepoImp) GetOrCreate(_ context.Context, market pkg.Market) (int, error) {
 	_, err := m.db.Exec(`
 INSERT INTO markets(exchange_name, base_asset, quote_asset) VALUES (?, ?, ?) ON CONFLICT DO NOTHING
 	`, market.ExchangeName, market.BaseAsset, market.QuoteAsset)
@@ -28,6 +27,38 @@ INSERT INTO markets(exchange_name, base_asset, quote_asset) VALUES (?, ?, ?) ON 
 	}
 	return marketID, nil
 
+}
+
+func (m marketRepoImp) GetAllExchangeMarkets(ctx context.Context, exchangeName string) ([]pkg.Market, error) {
+	stmt := `SELECT id, base_asset, quote_asset FROM markets WHERE exchange_name = ?`
+	rows, err := m.db.QueryContext(ctx, stmt, exchangeName)
+	if err != nil {
+		return nil, errors.Wrap(err, "couldn't get rows")
+	}
+
+	var markets []pkg.Market
+	for rows.Next() {
+		var market pkg.Market
+		if err = rows.Scan(&market.ID, &market.BaseAsset, &market.QuoteAsset); err != nil {
+			return nil, errors.Wrap(err, "couldn't scan to market")
+		}
+		market.ExchangeName = exchangeName
+		markets = append(markets, market)
+	}
+	return markets, nil
+}
+
+func (m marketRepoImp) GetByID(ctx context.Context, marketID int) (pkg.Market, error) {
+	stmt := `SELECT exchange_name, base_asset, quote_asset FROM markets WHERE id = ?`
+	var ans pkg.Market
+	ans.ID = marketID
+
+	err := m.db.QueryRowContext(ctx, stmt, marketID).Scan(&ans.ExchangeName, &ans.BaseAsset, &ans.QuoteAsset)
+	if err != nil {
+		return ans, errors.Wrap(err, "couldn't get data from db")
+	}
+
+	return ans, nil
 }
 
 func NewMarketRepo(connString string) (repositories.MarketRepo, error) {

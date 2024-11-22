@@ -36,7 +36,7 @@ var runtgbotCmd = &cobra.Command{
 		logger := pkg.GetLogger()
 
 		ctx := context.Background()
-		pgconn, err := postgres.ConnectPostgres(ctx, config.Postgres)
+		pgconn, err := postgres.ConnectPostgres(ctx, config.Database.Postgres)
 		if err != nil {
 			logger.Fatal("couldn't connect to postgres", zap.Error(err))
 		}
