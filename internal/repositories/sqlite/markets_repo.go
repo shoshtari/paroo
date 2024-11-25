@@ -61,14 +61,9 @@ func (m marketRepoImp) GetByID(ctx context.Context, marketID int) (pkg.Market, e
 	return ans, nil
 }
 
-func NewMarketRepo(connString string) (repositories.MarketRepo, error) {
+func NewMarketRepo(ctx context.Context, db *sql.DB) (repositories.MarketRepo, error) {
 
-	db, err := getConn(connString)
-	if err != nil {
-		return nil, errors.Wrap(err, "couldn't open db")
-	}
-
-	_, err = db.Exec(`
+	_, err := db.ExecContext(ctx, `
 		CREATE TABLE IF NOT EXISTS markets (
 			id INTEGER PRIMARY KEY,
 			exchange_name TEXT,

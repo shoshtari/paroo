@@ -46,3 +46,21 @@ type MarketStat struct {
 
 	Date time.Time
 }
+
+type Asset struct {
+	Symbol string
+	Value  decimal.Decimal
+}
+
+type PortFolio struct {
+	ExchangeName string
+	Assets       []struct {
+		Symbol string
+		Value  decimal.Decimal
+	}
+}
+
+type BalanceInTime struct {
+	Time  time.Time
+	Value decimal.Decimal
+}

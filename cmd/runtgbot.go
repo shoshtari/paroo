@@ -21,7 +21,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func GetRepos(config configs.SectionDatabase) (marketRepo repositories.MarketRepo, err error) {
+func GetRepos(config configs.SectionDatabase) (
+	marketRepo repositories.MarketRepo,
+	balanceRepo repositories.BalanceRepo,
+	err error) {
 
 	if config.Provider == "" {
 		if config.Postgres.Host != "" {
@@ -31,9 +34,9 @@ func GetRepos(config configs.SectionDatabase) (marketRepo repositories.MarketRep
 		}
 	}
 
+	ctx := context.Background()
 	switch config.Provider {
 	case "postgres":
-		ctx := context.Background()
 		pgconn, err2 := postgresRepo.ConnectPostgres(ctx, config.Postgres)
 		if err != nil {
 			err = errors.Wrap(err2, "couldn't connect to postgres")
@@ -45,13 +48,33 @@ func GetRepos(config configs.SectionDatabase) (marketRepo repositories.MarketRep
 			err = errors.Wrap(err, "couldn't make markets repo")
 			return
 		}
+
+		balanceRepo, err2 = postgresRepo.NewBalanceRepo(pgconn, ctx)
+		if err2 != nil {
+			err = errors.Wrap(err, "couldn't make balance repo")
+			return
+		}
 		return
 
 	case "sqlite":
-		marketRepo, err = sqliteRepo.NewMarketRepo(config.Sqlite)
+		db, err2 := sqliteRepo.Connect(config.Sqlite)
+		if err != nil {
+			err = err2
+			return
+		}
+
+		marketRepo, err = sqliteRepo.NewMarketRepo(ctx, db)
+		if err != nil {
+			err = errors.WithMessage(err2, "couldn't initialize market repo")
+		}
+
+		balanceRepo, err = sqliteRepo.NewBalanceRepo(ctx, db)
+		if err != nil {
+			err = errors.WithMessage(err2, "couldn't initialize balance  repo")
+		}
 		return
 	}
-	return marketRepo, err
+	return
 
 }
 
@@ -72,7 +95,7 @@ var runtgbotCmd = &cobra.Command{
 		}
 
 		logger := pkg.GetLogger()
-		marketsRepo, err := GetRepos(config.Database)
+		marketsRepo, balanceRepo, err := GetRepos(config.Database)
 		if err != nil {
 			logger.Fatal("couldn't get repos", zap.Error(err))
 		}
@@ -86,7 +109,7 @@ var runtgbotCmd = &cobra.Command{
 		if err != nil {
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}
-		parooCore := core.NewParooCode(tgbot, wallexClient)
+		parooCore := core.NewParooCode(tgbot, wallexClient, balanceRepo)
 
 		logger.Info("All dependencies initialized, starting the core")
 		if err := parooCore.Start(); err != nil {
