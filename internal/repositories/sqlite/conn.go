@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func getConn(connString string) (*sql.DB, error) {
+func Connect(connString string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", connString)
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't open db")

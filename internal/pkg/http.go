@@ -65,9 +65,15 @@ func SendHTTPRequest(httpClient http.Client, url string, reqbody any, resbody an
 		return errors.New(fmt.Sprintf("status is %d instead of 200 content is %s", res.StatusCode, string(resdata)))
 	}
 
-	if resbody != nil {
-		if err = json.Unmarshal(resdata, resbody); err != nil {
-			return errors.Wrap(err, "couln't unmarshal data from json")
+	switch v := resbody.(type) {
+	case *string:
+		*v = string(resdata)
+
+	default:
+		if resbody != nil {
+			if err = json.Unmarshal(resdata, resbody); err != nil {
+				return errors.Wrap(err, "couln't unmarshal data from json")
+			}
 		}
 	}
 

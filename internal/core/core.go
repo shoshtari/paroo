@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/shoshtari/paroo/internal/exchange"
 	"github.com/shoshtari/paroo/internal/pkg"
+	"github.com/shoshtari/paroo/internal/repositories"
 	telegrambot "github.com/shoshtari/paroo/internal/telegram_bot"
 	"go.uber.org/zap"
 )
@@ -18,8 +19,11 @@ type UpdateHandler struct {
 type ParooCoreImp struct {
 	tgbot        telegrambot.TelegramBot
 	wallexClient exchange.Exchange
-	handlers     [][]UpdateHandler
-	handlerMap   map[string]UpdateHandler
+	balanceRepo  repositories.BalanceRepo
+	statRepo     repositories.MarketStatsRepo
+
+	handlers   [][]UpdateHandler
+	handlerMap map[string]UpdateHandler
 }
 
 func (p ParooCoreImp) handleTelegramNewMessage(update telegrambot.TelegramUpdate) error {
@@ -68,10 +72,12 @@ func (p ParooCoreImp) Start() error {
 	}
 }
 
-func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange) ParooCore {
+func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange, balanceRepo repositories.BalanceRepo, statsRepo repositories.MarketStatsRepo) ParooCore {
 	ans := ParooCoreImp{
 		tgbot:        tgbot,
 		wallexClient: wallexClient,
+		balanceRepo:  balanceRepo,
+		statRepo:     statsRepo,
 	}
 	handlers := [][]UpdateHandler{{
 		UpdateHandler{"Balance Chart", ans.handleBalanceChart},
@@ -85,5 +91,11 @@ func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange)
 			ans.handlerMap[handler.Name] = handler
 		}
 	}
+	go func() {
+		if err := ans.getStatDaemon(); err != nil {
+			panic(err)
+		}
+	}()
+
 	return ans
 }
