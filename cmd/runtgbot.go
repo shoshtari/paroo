@@ -24,6 +24,7 @@ import (
 func GetRepos(config configs.SectionDatabase) (
 	marketRepo repositories.MarketRepo,
 	balanceRepo repositories.BalanceRepo,
+	statsRepo repositories.MarketStatsRepo,
 	err error) {
 
 	if config.Provider == "" {
@@ -54,23 +55,34 @@ func GetRepos(config configs.SectionDatabase) (
 			err = errors.Wrap(err, "couldn't make balance repo")
 			return
 		}
+
+		statsRepo, err2 = postgresRepo.NewMarketStatsRepo(pgconn, ctx)
+		if err2 != nil {
+			err = errors.Wrap(err, "couldn't make stats repo")
+			return
+		}
 		return
 
 	case "sqlite":
 		db, err2 := sqliteRepo.Connect(config.Sqlite)
-		if err != nil {
+		if err2 != nil {
 			err = err2
 			return
 		}
 
-		marketRepo, err = sqliteRepo.NewMarketRepo(ctx, db)
+		marketRepo, err2 = sqliteRepo.NewMarketRepo(ctx, db)
 		if err != nil {
 			err = errors.WithMessage(err2, "couldn't initialize market repo")
 		}
 
-		balanceRepo, err = sqliteRepo.NewBalanceRepo(ctx, db)
+		balanceRepo, err2 = sqliteRepo.NewBalanceRepo(ctx, db)
 		if err != nil {
 			err = errors.WithMessage(err2, "couldn't initialize balance  repo")
+		}
+
+		statsRepo, err2 = sqliteRepo.NewMarketStatsRepo(ctx, db)
+		if err != nil {
+			err = errors.WithMessage(err2, "couldn't initialize stats  repo")
 		}
 		return
 	}
@@ -95,7 +107,7 @@ var runtgbotCmd = &cobra.Command{
 		}
 
 		logger := pkg.GetLogger()
-		marketsRepo, balanceRepo, err := GetRepos(config.Database)
+		marketsRepo, balanceRepo, statsRepo, err := GetRepos(config.Database)
 		if err != nil {
 			logger.Fatal("couldn't get repos", zap.Error(err))
 		}
@@ -109,7 +121,8 @@ var runtgbotCmd = &cobra.Command{
 		if err != nil {
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}
-		parooCore := core.NewParooCode(tgbot, wallexClient, balanceRepo)
+
+		parooCore := core.NewParooCode(tgbot, wallexClient, balanceRepo, statsRepo)
 
 		logger.Info("All dependencies initialized, starting the core")
 		if err := parooCore.Start(); err != nil {

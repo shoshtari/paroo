@@ -72,5 +72,15 @@ func (p ParooCoreImp) getWalletStat() error {
 	return nil
 }
 func (p ParooCoreImp) getMarketStat() error {
-	panic("unimplemented")
+	stats, err := p.wallexClient.GetMarketsStats()
+	if err != nil {
+		return errors.Wrap(err, "couldn't get market stats from wallex")
+	}
+
+	for _, stat := range stats {
+		if err := p.statRepo.Insert(context.TODO(), stat); err != nil {
+			return errors.Wrap(err, "couldn't insert stat to db")
+		}
+	}
+	return nil
 }

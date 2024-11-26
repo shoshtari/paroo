@@ -20,6 +20,7 @@ type ParooCoreImp struct {
 	tgbot        telegrambot.TelegramBot
 	wallexClient exchange.Exchange
 	balanceRepo  repositories.BalanceRepo
+	statRepo     repositories.MarketStatsRepo
 
 	handlers   [][]UpdateHandler
 	handlerMap map[string]UpdateHandler
@@ -71,11 +72,12 @@ func (p ParooCoreImp) Start() error {
 	}
 }
 
-func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange, balanceRepo repositories.BalanceRepo) ParooCore {
+func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange, balanceRepo repositories.BalanceRepo, statsRepo repositories.MarketStatsRepo) ParooCore {
 	ans := ParooCoreImp{
 		tgbot:        tgbot,
 		wallexClient: wallexClient,
 		balanceRepo:  balanceRepo,
+		statRepo:     statsRepo,
 	}
 	handlers := [][]UpdateHandler{{
 		UpdateHandler{"Balance Chart", ans.handleBalanceChart},
@@ -89,5 +91,11 @@ func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange,
 			ans.handlerMap[handler.Name] = handler
 		}
 	}
+	go func() {
+		if err := ans.getStatDaemon(); err != nil {
+			panic(err)
+		}
+	}()
+
 	return ans
 }

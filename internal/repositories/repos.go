@@ -18,3 +18,7 @@ type BalanceRepo interface {
 	Insert(ctx context.Context, changeName string, date time.Time, balance decimal.Decimal) error
 	Get(ctx context.Context, exchangeName string, start, date time.Time) ([]time.Time, []decimal.Decimal, error)
 }
+
+type MarketStatsRepo interface {
+	Insert(ctx context.Context, stat pkg.MarketStat) error
+}
