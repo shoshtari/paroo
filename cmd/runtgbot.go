@@ -38,6 +38,7 @@ func GetRepos(config configs.SectionDatabase) (
 	ctx := context.Background()
 	switch config.Provider {
 	case "postgres":
+		pkg.GetLogger().Info("using postgres for db")
 		pgconn, err2 := postgresRepo.ConnectPostgres(ctx, config.Postgres)
 		if err != nil {
 			err = errors.Wrap(err2, "couldn't connect to postgres")
@@ -64,6 +65,8 @@ func GetRepos(config configs.SectionDatabase) (
 		return
 
 	case "sqlite":
+		pkg.GetLogger().Info("using sqlite for db")
+
 		db, err2 := sqliteRepo.Connect(config.Sqlite)
 		if err2 != nil {
 			err = err2

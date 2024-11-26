@@ -46,7 +46,6 @@ func (p ParooCoreImp) getWalletStat() error {
 	marketSymbolToPrice := make(map[string]decimal.Decimal)
 	for _, market := range markets {
 		if price, exists := marketIDToPrice[market.ID]; !exists {
-			pkg.GetLogger().Warn("found an asset without market id", zap.String("symbol", market.BaseAsset))
 			continue
 		} else {
 			marketSymbolToPrice[market.BaseAsset] = price

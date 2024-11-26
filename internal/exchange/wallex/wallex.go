@@ -12,7 +12,9 @@ import (
 )
 
 var avoidingSymbols = map[string]struct{}{
-	"BNB": {},
+	"BNB":  {},
+	"LINK": {},
+	"EGLD": {},
 }
 
 type wallexClientImp struct {
