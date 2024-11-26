@@ -91,11 +91,7 @@ func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange,
 			ans.handlerMap[handler.Name] = handler
 		}
 	}
-	go func() {
-		if err := ans.getStatDaemon(); err != nil {
-			panic(err)
-		}
-	}()
+	go ans.getStatDaemon()
 
 	return ans
 }

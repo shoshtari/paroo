@@ -33,7 +33,7 @@ func (m BalanceRepoImp) Insert(ctx context.Context, exchangeName string, date ti
 		INSERT INTO balances(
 			exchange_name,
 			date,
-			balance,
+			balance
 		) VALUES (
 			?, ?, ?
 		)
@@ -41,10 +41,13 @@ func (m BalanceRepoImp) Insert(ctx context.Context, exchangeName string, date ti
 	_, err := m.db.ExecContext(ctx, stmt,
 		exchangeName,
 		date,
-		balance,
+		balance.String(),
 	)
 
-	return err
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
 
 }
 
