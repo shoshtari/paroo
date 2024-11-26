@@ -42,7 +42,12 @@ func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 		if _, exists := avoidingSymbols[symbol.BaseAsset]; exists {
 			continue
 		}
-		logger := pkg.GetLogger().With(zap.String("exchange", "wallex"), zap.String("method", "GetMarketStats"), zap.String("base asset", symbol.BaseAsset), zap.String("quote asset", symbol.QuoteAsset))
+		logger := pkg.GetLogger().With(
+			zap.String("exchange", "wallex"),
+			zap.String("method", "GetMarketStats"),
+			zap.String("base asset", symbol.BaseAsset),
+			zap.String("quote asset", symbol.QuoteAsset),
+		)
 
 		market := pkg.Market{
 			ExchangeName: exchangeName,
