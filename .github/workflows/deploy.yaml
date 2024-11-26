@@ -43,3 +43,20 @@ jobs:
           docker pull $image_name:${{ env.old_tag }}
           docker tag $image_name:${{ env.old_tag }} $image_name:${{ env.new_tag }}
           docker push $image_name:${{ env.new_tag }}
+
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_SSH_HOST }}
+          username: ${{ secrets.PROD_SSH_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.PROD_SSH_PORT }}
+          script: |
+            cd /opt
+            if [ ! -d paroo ]; then
+              echo "paroo is not cloned, you need to clone it first"
+              exit 1
+            fi
+            cd paroo
+            git pull
+            docker compose -f compose.yaml restart
