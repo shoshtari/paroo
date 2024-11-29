@@ -57,7 +57,7 @@ jobs:
           script: |
             cd /opt
             if [ ! -type d ${{ github.repository }} ]; then
-              echo "You should have cloned it first manually
+              echo "You should have cloned it first manually"
               exit 1
             fi
             cd "${{ github.repository }}/deploy"
