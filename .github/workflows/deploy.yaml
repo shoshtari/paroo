@@ -6,8 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-22.04
+    environment: production
 
     outputs:
       version: ${{ steps.detect_version.outputs.version }}
@@ -42,21 +43,22 @@ jobs:
           image_name="ghcr.io/${{ github.repository_owner }}/${{ github.repository }}"
           docker pull $image_name:${{ env.old_tag }}
           docker tag $image_name:${{ env.old_tag }} $image_name:${{ env.new_tag }}
+          docker tag $image_name:${{ env.old_tag }} $image_name:latest
           docker push $image_name:${{ env.new_tag }}
+          docker push $image_name
 
-      - name: executing remote ssh commands using password
+      - name: deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.PROD_SSH_HOST }}
-          username: ${{ secrets.PROD_SSH_USER }}
-          key: ${{ secrets.PROD_SSH_KEY }}
-          port: ${{ secrets.PROD_SSH_PORT }}
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_KEY }}
+          port: ${{ secrets.PROD_PORT }}
           script: |
             cd /opt
-            if [ ! -d paroo ]; then
-              echo "paroo is not cloned, you need to clone it first"
+            if [ ! -type d ${{ github.repository }} ]; then
+              echo "You should have cloned it first manually
               exit 1
             fi
-            cd paroo
-            git pull
-            docker compose -f compose.yaml restart
+            cd "${{ github.repository }}/deploy"
+            docker compose up -d -f compose.yaml
