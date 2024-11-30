@@ -10,5 +10,6 @@ RUN CGO_ENABLED=0 go build -o /opt/paroo main.go
 
 FROM scratch
 COPY --from=build /opt/paroo /opt/paroo
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 CMD ["/opt/paroo"]
