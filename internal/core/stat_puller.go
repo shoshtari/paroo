@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -71,10 +72,18 @@ func (p ParooCoreImp) getWalletStat() error {
 	return nil
 }
 func (p ParooCoreImp) getMarketStat() error {
+	logger := pkg.GetLogger().With(
+		zap.String("package", "core"),
+		zap.String("module", "stat puller"),
+		zap.String("method", "getMarketStat"),
+	)
+
 	stats, err := p.wallexClient.GetMarketsStats()
 	if err != nil {
 		return errors.Wrap(err, "couldn't get market stats from wallex")
 	}
+
+	logger.Info(fmt.Sprintf("got %d stat from wallex", len(stats)))
 
 	for _, stat := range stats {
 		if err := p.statRepo.Insert(context.TODO(), stat); err != nil {

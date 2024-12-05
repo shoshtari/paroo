@@ -40,6 +40,12 @@ type SectionDatabase struct {
 	Sqlite   string          `mapstructure:"sqlite"`
 }
 
+type SectionRedis struct {
+	Host string `mapstructure:"host"`
+	Port uint16 `mapstructure:"port"`
+	DB   int    `mapstructure:"db"`
+}
+
 type SectionPostgres struct {
 	Host            string        `mapstructure:"host"`
 	Port            uint16        `mapstructure:"port"`
