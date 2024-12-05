@@ -27,7 +27,36 @@ type ListMarketStatsResponse struct {
 }
 
 func (w wallexClientImp) GetMarkets() ([]pkg.Market, error) {
-	return w.marketsRepo.GetAllExchangeMarkets(context.Background(), exchangeName)
+	var res ListMarketStatsResponse
+	if err := w.sendReq("markets", nil, &res); err != nil {
+		return nil, errors.Wrap(err, "couldn't send request")
+	}
+	if !res.Success {
+		return nil, pkg.InternalError
+	}
+
+	var markets []pkg.Market
+	for _, symbol := range res.Result.Symbols {
+		if _, exists := avoidingSymbols[symbol.BaseAsset]; exists {
+			continue
+		}
+		market := pkg.Market{
+			ExchangeName: exchangeName,
+			BaseAsset:    symbol.BaseAsset,
+			QuoteAsset:   symbol.QuoteAsset,
+			EnName:       symbol.EnName,
+			FaName:       symbol.FaName,
+		}
+		var err error
+		market.ID, market.IsActive, err = w.marketsRepo.GetOrCreate(context.TODO(), market)
+		if err != nil {
+			return nil, errors.Wrap(err, "couldn't get/create row in db")
+		}
+
+		markets = append(markets, market)
+	}
+	return markets, nil
+
 }
 
 func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {

@@ -34,6 +34,26 @@ func (m marketRepoImp) migrate(ctx context.Context) error {
 	}
 	return nil
 }
+
+func (m marketRepoImp) GetByExchangeAndAsset(ctx context.Context, exchange, base, quote string) (pkg.Market, error) {
+	ans := pkg.Market{
+		ExchangeName: exchange,
+		BaseAsset:    base,
+		QuoteAsset:   quote,
+	}
+
+	err := m.db.QueryRowContext(ctx, `
+		SELECT id, en_name, fa_name is_active FROM markets
+			WHERE exchange_name = ? AND base_asset = ? AND quote_asset = ?
+	`, exchange, base, quote).Scan(&ans.ID, &ans.EnName, &ans.FaName, &ans.IsActive)
+
+	if err != nil {
+		return ans, errors.Wrap(err, "couldn't insert into markets")
+	}
+	return ans, nil
+
+}
+
 func (m marketRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int, bool, error) {
 	_, err := m.db.ExecContext(ctx, `
 INSERT INTO markets(exchange_name, base_asset, quote_asset, en_name, fa_name) VALUES (?, ?, ?, ?, ?) ON CONFLICT DO NOTHING

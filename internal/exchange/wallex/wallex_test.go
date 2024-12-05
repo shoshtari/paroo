@@ -51,8 +51,9 @@ func TestBalance(t *testing.T) {
 }
 
 func TestMarkets(t *testing.T) {
-	_, err := wallexClient.GetMarketsStats()
+	markets, err := wallexClient.GetMarkets()
 	assert.Nil(t, err)
+	assert.NotEmpty(t, markets)
 
 	_, err = db.Exec("UPDATE markets SET is_active = TRUE")
 	assert.Nil(t, err)
@@ -60,8 +61,5 @@ func TestMarkets(t *testing.T) {
 	stats, err := wallexClient.GetMarketsStats()
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
-
-	markets, err := wallexClient.GetMarkets()
-	assert.Nil(t, err)
-	assert.NotNil(t, markets)
+	assert.NotEmpty(t, stats)
 }

@@ -9,11 +9,11 @@ import (
 	"github.com/shoshtari/paroo/internal/repositories"
 )
 
-type MarketsRepoImp struct {
+type marketsRepoImp struct {
 	pool *pgxpool.Pool
 }
 
-func (m MarketsRepoImp) migrate(ctx context.Context) error {
+func (m marketsRepoImp) migrate(ctx context.Context) error {
 	stmts := []string{`
 		CREATE TABLE IF NOT EXISTS markets(
 			id SERIAL PRIMARY KEY,
@@ -36,7 +36,26 @@ func (m MarketsRepoImp) migrate(ctx context.Context) error {
 
 }
 
-func (m MarketsRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int, bool, error) {
+func (m marketsRepoImp) GetByExchangeAndAsset(ctx context.Context, exchange, base, quote string) (pkg.Market, error) {
+	ans := pkg.Market{
+		ExchangeName: exchange,
+		BaseAsset:    base,
+		QuoteAsset:   quote,
+	}
+
+	err := m.pool.QueryRow(ctx, `
+		SELECT id, en_name, fa_name is_active FROM markets
+			WHERE exchange_name = $1 AND base_asset = $2 AND quote_asset = $3
+	`, exchange, base, quote).Scan(&ans.ID, &ans.EnName, &ans.FaName, &ans.IsActive)
+
+	if err != nil {
+		return ans, errors.Wrap(err, "couldn't insert into markets")
+	}
+	return ans, nil
+
+}
+
+func (m marketsRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int, bool, error) {
 	stmt := `
 		INSERT INTO markets(
 			exchange_name,
@@ -63,7 +82,7 @@ func (m MarketsRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int
 
 }
 
-func (m MarketsRepoImp) GetAllExchangeMarkets(ctx context.Context, exchangeName string) ([]pkg.Market, error) {
+func (m marketsRepoImp) GetAllExchangeMarkets(ctx context.Context, exchangeName string) ([]pkg.Market, error) {
 	stmt := `SELECT id, base_asset, quote_asset FROM markets WHERE exchange_name = $1`
 	rows, err := m.pool.Query(ctx, stmt, exchangeName)
 	if err != nil {
@@ -82,7 +101,7 @@ func (m MarketsRepoImp) GetAllExchangeMarkets(ctx context.Context, exchangeName 
 	return markets, nil
 }
 
-func (m MarketsRepoImp) GetByID(ctx context.Context, marketID int) (pkg.Market, error) {
+func (m marketsRepoImp) GetByID(ctx context.Context, marketID int) (pkg.Market, error) {
 	stmt := `SELECT exchange_name, base_asset, quote_asset FROM markets WHERE id = $1`
 	var ans pkg.Market
 	ans.ID = marketID
@@ -96,7 +115,7 @@ func (m MarketsRepoImp) GetByID(ctx context.Context, marketID int) (pkg.Market, 
 }
 
 func NewMarketRepo(pool *pgxpool.Pool, ctx context.Context) (repositories.MarketRepo, error) {
-	ans := MarketsRepoImp{
+	ans := marketsRepoImp{
 		pool: pool,
 	}
 	return ans, ans.migrate(ctx)
