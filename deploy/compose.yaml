@@ -16,8 +16,16 @@ services:
         source: ./config.yaml
         target: /etc/paroo/config.yaml
 
+    networks:
+    - paroo
+
   paroo-db:
     image: postgres:16
     restart: always
     command: -c 'max_connections=200'
     env_file: secrets.env
+    networks:
+    - paroo
+
+networks:
+  paroo: { }
