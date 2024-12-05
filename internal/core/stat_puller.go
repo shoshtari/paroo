@@ -30,12 +30,12 @@ func (p ParooCoreImp) getWalletStat() error {
 
 	stats, err := p.wallexClient.GetMarketsStats()
 	if err != nil {
-		return errors.Wrap(err, "couldn't get stats from wallex for wallet")
+		return errors.Wrap(err, "couldn't get market stats from wallex")
 	}
 
 	markets, err := p.wallexClient.GetMarkets()
 	if err != nil {
-		return errors.Wrap(err, "couldn't get markets for wallex for wallet")
+		return errors.Wrap(err, "couldn't get markets from wallex")
 	}
 
 	marketIDToPrice := make(map[int]decimal.Decimal)
@@ -65,8 +65,7 @@ func (p ParooCoreImp) getWalletStat() error {
 
 	}
 	if err := p.balanceRepo.Insert(context.TODO(), "wallex", time.Now(), balance); err != nil {
-		pkg.GetLogger().With(zap.String("balance", balance.String())).Error("couldn't insert to db")
-		return errors.Wrap(err, "couldn't insert to db")
+		return errors.Wrap(err, "couldn't insert balance to db")
 	}
 
 	return nil

@@ -39,6 +39,9 @@ func NewWallexClient(config configs.SectionWallex, marketsRepo repositories.Mark
 	if config.Token == "" {
 		return nil, errors.Wrap(pkg.BadRequestError, "token cannot be empty")
 	}
+	if marketsRepo == nil {
+		return nil, errors.Wrap(pkg.BadRequestError, "markets repo is empty")
+	}
 	ans := wallexClientImp{
 		baseAddress: config.BaseAddress,
 		token:       config.Token,

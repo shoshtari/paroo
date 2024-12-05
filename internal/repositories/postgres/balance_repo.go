@@ -33,7 +33,7 @@ func (m BalanceRepoImp) Insert(ctx context.Context, exchangeName string, date ti
 		INSERT INTO balances(
 			exchange_name,
 			date,
-			balance,
+			balance
 		) VALUES (
 			$1, $2, $3
 		)

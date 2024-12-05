@@ -36,7 +36,8 @@ func (m MarketsRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int
 			quote_asset
 		) VALUES (
 			$1, $2, $3
-		) RETURNING id ON CONFLICT DO NOTHING
+		) ON CONFLICT(exchange_name, base_asset, quote_asset) DO UPDATE SET id = markets.id
+			RETURNING id
 		`
 	var marketID int
 	err := m.pool.QueryRow(ctx, stmt,
@@ -51,7 +52,7 @@ func (m MarketsRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int
 
 func (m MarketsRepoImp) GetAllExchangeMarkets(ctx context.Context, exchangeName string) ([]pkg.Market, error) {
 	stmt := `SELECT id, base_asset, quote_asset FROM markets WHERE exchange_name = $1`
-	rows, err := m.pool.Query(ctx, stmt)
+	rows, err := m.pool.Query(ctx, stmt, exchangeName)
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't get rows")
 	}

@@ -33,7 +33,7 @@ func (m marketStatsRepoImp) Insert(ctx context.Context, stat pkg.MarketStat) err
 			market_id,
 			buy_price,
 			sell_price,
-			date,
+			date
 		) VALUES (
 			$1, $2, $3, $4
 		)
