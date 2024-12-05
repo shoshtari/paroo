@@ -16,6 +16,8 @@ type ListMarketStatsResponse struct {
 		Symbols map[string]struct {
 			BaseAsset  string `json:"baseAsset"`
 			QuoteAsset string `json:"quoteAsset"`
+			EnName     string `json:"enName"`
+			FaName     string `json:"faName"`
 			Stats      struct {
 				BuyPrice  string `json:"bidPrice"`
 				SellPrice string `json:"askPrice"`
@@ -23,8 +25,6 @@ type ListMarketStatsResponse struct {
 		} `json:"symbols"`
 	} `json:"result"`
 }
-
-var neccessarySymbols = []string{"BTC", "DOGE", "SHIB", "XRP", "PEPE", "TRX", "ETH", "FTM", "ADA", "SOL", "TON", "NOT"}
 
 func (w wallexClientImp) GetMarkets() ([]pkg.Market, error) {
 	return w.marketsRepo.GetAllExchangeMarkets(context.Background(), exchangeName)
@@ -55,12 +55,17 @@ func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 			ExchangeName: exchangeName,
 			BaseAsset:    symbol.BaseAsset,
 			QuoteAsset:   symbol.QuoteAsset,
+			EnName:       symbol.EnName,
+			FaName:       symbol.FaName,
 		}
 		var err error
 
-		market.ID, err = w.marketsRepo.GetOrCreate(context.TODO(), market)
+		market.ID, market.IsActive, err = w.marketsRepo.GetOrCreate(context.TODO(), market)
 		if err != nil {
 			return nil, errors.Wrap(err, "couldn't insert market to db")
+		}
+		if !market.IsActive {
+			continue
 		}
 
 		buyprice, err := decimal.NewFromString(symbol.Stats.BuyPrice)

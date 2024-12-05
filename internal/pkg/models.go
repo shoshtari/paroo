@@ -11,6 +11,9 @@ type Market struct {
 	ExchangeName string
 	BaseAsset    string
 	QuoteAsset   string
+	EnName       string
+	FaName       string
+	IsActive     bool
 }
 
 type OrderType int

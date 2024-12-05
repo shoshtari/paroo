@@ -14,7 +14,7 @@ type MarketsRepoImp struct {
 }
 
 func (m MarketsRepoImp) migrate(ctx context.Context) error {
-	stmt := `
+	stmts := []string{`
 		CREATE TABLE IF NOT EXISTS markets(
 			id SERIAL PRIMARY KEY,
 			exchange_name varchar(50),
@@ -22,31 +22,44 @@ func (m MarketsRepoImp) migrate(ctx context.Context) error {
 			quote_asset varchar(50),
 			UNIQUE(exchange_name, base_asset, quote_asset)
 		)
-		`
-	_, err := m.pool.Exec(ctx, stmt)
-	return err
+		`,
+		`ALTER TABLE markets ADD en_name varchar(50)`,
+		`ALTER TABLE markets ADD fa_name varchar(50)`,
+		`ALTER TABLE markets ADD is_active bool DEFAULT FALSE`,
+	}
+	for _, stmt := range stmts {
+		if _, err := m.pool.Exec(ctx, stmt); err != nil {
+			return errors.Wrap(errors.WithMessage(err, "error on stmt: "+stmt), "couldn't do migration")
+		}
+	}
+	return nil
 
 }
 
-func (m MarketsRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int, error) {
+func (m MarketsRepoImp) GetOrCreate(ctx context.Context, market pkg.Market) (int, bool, error) {
 	stmt := `
 		INSERT INTO markets(
 			exchange_name,
 			base_asset,
-			quote_asset
+			quote_asset,
+			en_name,
+			fa_name
 		) VALUES (
-			$1, $2, $3
+			$1, $2, $3, $4, $5
 		) ON CONFLICT(exchange_name, base_asset, quote_asset) DO UPDATE SET id = markets.id
-			RETURNING id
+			RETURNING id, is_active
 		`
 	var marketID int
+	var isActive bool
 	err := m.pool.QueryRow(ctx, stmt,
 		market.ExchangeName,
 		market.BaseAsset,
 		market.QuoteAsset,
-	).Scan(&marketID)
+		market.EnName,
+		market.FaName,
+	).Scan(&marketID, &isActive)
 
-	return marketID, err
+	return marketID, isActive, err
 
 }
 

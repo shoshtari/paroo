@@ -2,6 +2,7 @@ package wallex
 
 import (
 	"context"
+	"database/sql"
 	"os"
 	"testing"
 
@@ -15,12 +16,13 @@ import (
 
 var wallexClient exchange.Exchange
 var config configs.ParooConfig
+var db *sql.DB
 
 func TestMain(m *testing.M) {
 	var err error
 	config = test.GetTestConfig()
 
-	db, err := sqlite.Connect(":memory:")
+	db, err = sqlite.Connect(":memory:")
 	if err != nil {
 		panic(err)
 	}
@@ -49,6 +51,12 @@ func TestBalance(t *testing.T) {
 }
 
 func TestMarkets(t *testing.T) {
+	_, err := wallexClient.GetMarketsStats()
+	assert.Nil(t, err)
+
+	_, err = db.Exec("UPDATE markets SET is_active = TRUE")
+	assert.Nil(t, err)
+
 	stats, err := wallexClient.GetMarketsStats()
 	assert.Nil(t, err)
 	assert.NotNil(t, stats)
