@@ -40,7 +40,7 @@ func GetRepos(config configs.SectionDatabase) (
 	case "postgres":
 		pkg.GetLogger().Info("using postgres for db")
 		pgconn, err2 := postgresRepo.ConnectPostgres(ctx, config.Postgres)
-		if err != nil {
+		if err2 != nil {
 			err = errors.Wrap(err2, "couldn't connect to postgres")
 			return
 		}
