@@ -22,6 +22,8 @@ func ConnectPostgres(ctx context.Context, config configs.SectionPostgres) (*pgxp
 	cfg.MinConns = config.MinConn
 	cfg.MaxConns = config.MaxConn
 
+	cfg.ConnConfig.TLSConfig = nil
+
 	pool, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return nil, errors.Wrap(err, "couldn't make pool")
