@@ -24,6 +24,8 @@ type ListMarketStatsResponse struct {
 	} `json:"result"`
 }
 
+var neccessarySymbols = []string{"BTC", "DOGE", "SHIB", "XRP", "PEPE", "TRX", "ETH", "FTM", "ADA", "SOL", "TON", "NOT"}
+
 func (w wallexClientImp) GetMarkets() ([]pkg.Market, error) {
 	return w.marketsRepo.GetAllExchangeMarkets(context.Background(), exchangeName)
 }
