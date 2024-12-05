@@ -1,14 +1,23 @@
 services:
   paroo:
     image: ghcr.io/shoshtari/paroo
+    command:
+    - /opt/paroo
+    - runtgbot
     pull_policy: always
     restart: always
+    env_file: secrets.env
     ports:
       - "8000:8000"
     depends_on:
       - paroo-db
+    volumes:
+      - type: bind
+        source: ./config.yaml
+        target: /etc/paroo/config.yaml
 
   paroo-db:
     image: postgres:16
     restart: always
     command: -c 'max_connections=200'
+    env_file: secrets.env
