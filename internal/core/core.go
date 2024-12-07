@@ -79,6 +79,7 @@ func NewParooCore(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange,
 		balanceRepo:  balanceRepo,
 		statRepo:     statsRepo,
 	}
+
 	handlers := [][]UpdateHandler{{
 		UpdateHandler{"Balance Chart", ans.handleBalanceChart},
 	}}

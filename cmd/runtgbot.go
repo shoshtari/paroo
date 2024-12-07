@@ -21,7 +21,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func GetRepos(config configs.SectionDatabase) (
+func getRepos(config configs.SectionDatabase) (
 	marketRepo repositories.MarketRepo,
 	balanceRepo repositories.BalanceRepo,
 	statsRepo repositories.MarketStatsRepo,
@@ -47,19 +47,19 @@ func GetRepos(config configs.SectionDatabase) (
 
 		marketRepo, err2 = postgresRepo.NewMarketRepo(pgconn, ctx)
 		if err2 != nil {
-			err = errors.Wrap(err, "couldn't make markets repo")
+			err = errors.Wrap(err2, "couldn't make markets repo")
 			return
 		}
 
 		balanceRepo, err2 = postgresRepo.NewBalanceRepo(pgconn, ctx)
 		if err2 != nil {
-			err = errors.Wrap(err, "couldn't make balance repo")
+			err = errors.Wrap(err2, "couldn't make balance repo")
 			return
 		}
 
 		statsRepo, err2 = postgresRepo.NewMarketStatsRepo(pgconn, ctx)
 		if err2 != nil {
-			err = errors.Wrap(err, "couldn't make stats repo")
+			err = errors.Wrap(err2, "couldn't make stats repo")
 			return
 		}
 		return
@@ -93,7 +93,6 @@ func GetRepos(config configs.SectionDatabase) (
 
 }
 
-// runtgbotCmd represents the runtgbot command
 var runtgbotCmd = &cobra.Command{
 	Use:   "runtgbot",
 	Short: "run telegram bot",
@@ -110,9 +109,12 @@ var runtgbotCmd = &cobra.Command{
 		}
 
 		logger := pkg.GetLogger()
-		marketsRepo, balanceRepo, statsRepo, err := GetRepos(config.Database)
+		marketsRepo, balanceRepo, statsRepo, err := getRepos(config.Database)
 		if err != nil {
 			logger.Fatal("couldn't get repos", zap.Error(err))
+		}
+		if marketsRepo == nil || balanceRepo == nil || statsRepo == nil {
+			logger.Fatal("one of repos is nil", zap.Error(err))
 		}
 
 		wallexClient, err := wallex.NewWallexClient(config.Wallex, marketsRepo)
