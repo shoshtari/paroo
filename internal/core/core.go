@@ -33,6 +33,12 @@ func (p ParooCoreImp) handleTelegramNewMessage(update telegrambot.TelegramUpdate
 		return handler.Handler(update)
 	}
 
+	pkg.GetLogger().With(
+		zap.String("module", "core"),
+		zap.String("method", "Handle Telegram message"),
+		zap.Int("chat id", update.Message.Chat.ID),
+		zap.Int("message id ", update.UpdateID),
+	).Debug("new update received")
 	switch update.Message.Text {
 	case "/start":
 		var replyKeyboard [][]string

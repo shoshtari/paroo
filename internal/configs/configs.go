@@ -9,9 +9,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+type SectionLoggers struct {
+	Name  string `mapstructure:"name"`
+	Level string `mapstructure:"level"`
+}
+
 type SectionLog struct {
-	Environment string `mapstructure:"environment"`
-	Level       string `mapstructure:"level"`
+	Environment string           `mapstructure:"environment"`
+	Level       string           `mapstructure:"level"` // default level, no logger can have a level below this
+	Loggers     []SectionLoggers `mapstructure:"loggers"`
 }
 
 type SectionHTTPServer struct {

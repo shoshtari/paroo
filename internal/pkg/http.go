@@ -24,7 +24,7 @@ func WithHeader(key, val string) header {
 }
 
 func SendHTTPRequest(httpClient http.Client, url string, reqbody any, resbody any, headers ...header) error {
-	logger := GetLogger().With(zap.String("module", "pkg"), zap.String("method", "send http request"))
+	logger := GetLogger("http_request").With(zap.String("package", "pkg"), zap.String("module", "http"))
 
 	method := http.MethodPost
 	if reqbody == nil {
