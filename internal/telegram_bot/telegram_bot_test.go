@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/configs"
+	"github.com/shoshtari/paroo/internal/pkg"
 	"github.com/shoshtari/paroo/test"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
@@ -22,7 +23,7 @@ func TestMain(m *testing.M) {
 	}
 	var err error
 	config = test.GetTestConfig()
-	telegramBot, err = NewTelegramBot(config.Telegram)
+	telegramBot, err = NewTelegramBot(config.Telegram, pkg.GetLogger())
 	if err != nil {
 		panic(err)
 	}

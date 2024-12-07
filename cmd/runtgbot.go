@@ -85,7 +85,7 @@ var runtgbotCmd = &cobra.Command{
 			logger.Fatal("couldn't connect to wallex", zap.Error(err))
 		}
 
-		tgbot, err := telegrambot.NewTelegramBot(config.Telegram)
+		tgbot, err := telegrambot.NewTelegramBot(config.Telegram, logger.With(zap.String("package", "telegram bot")))
 		if err != nil {
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/shoshtari/paroo/internal/pkg"
+	"go.uber.org/zap"
 )
 
 type TelegramUpdate struct {
@@ -37,8 +38,13 @@ type telegramGetUpdateResponse struct {
 func (t TelegramBotImp) getUpdates() (<-chan TelegramUpdate, <-chan error) {
 	updateChan := make(chan TelegramUpdate)
 	errChan := make(chan error)
+	logger := t.logger.With(
+		zap.String("module", "get updates"),
+		zap.String("method", "get updates"),
+	)
 	go func() {
 		ticker := time.NewTicker(time.Millisecond)
+		logger.Info("starting to get updates")
 		for range ticker.C {
 			var res telegramGetUpdateResponse
 			url := t.getUrl("getUpdates")

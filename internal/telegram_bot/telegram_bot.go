@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/configs"
 	"github.com/shoshtari/paroo/internal/pkg"
+	"go.uber.org/zap"
 )
 
 type TelegramBot interface {
@@ -22,6 +23,7 @@ type TelegramBotImp struct {
 	baseAddress, token   string
 	lastRecievedUpdateID int
 	getUpdateTimeout     int
+	logger               *zap.Logger
 }
 
 func (t TelegramBotImp) getUrl(path string) string {
@@ -32,10 +34,15 @@ func (t TelegramBotImp) getMe() error {
 	return pkg.SendHTTPRequest(t.httpClient, t.getUrl("getMe"), nil, nil)
 }
 
-func NewTelegramBot(config configs.SectionTelegram) (TelegramBot, error) {
+func NewTelegramBot(config configs.SectionTelegram, logger *zap.Logger) (TelegramBot, error) {
 	var ans TelegramBotImp
 
 	ans.httpClient.Timeout = config.Timeout
+	ans.baseAddress = config.BaseAddress
+	ans.token = config.Token
+	ans.getUpdateTimeout = config.GetUpdateTimeout
+	ans.logger = logger
+
 	if config.Proxy != "" {
 		proxyURL, err := url.Parse(config.Proxy)
 		if err != nil {
@@ -43,10 +50,6 @@ func NewTelegramBot(config configs.SectionTelegram) (TelegramBot, error) {
 		}
 		ans.httpClient.Transport = &http.Transport{Proxy: http.ProxyURL(proxyURL)}
 	}
-
-	ans.baseAddress = config.BaseAddress
-	ans.token = config.Token
-	ans.getUpdateTimeout = config.GetUpdateTimeout
 
 	return ans, ans.getMe()
 }
