@@ -11,12 +11,6 @@ import (
 	"github.com/shoshtari/paroo/internal/repositories"
 )
 
-var avoidingSymbols = map[string]struct{}{
-	"BNB":  {},
-	"LINK": {},
-	"EGLD": {},
-}
-
 type wallexClientImp struct {
 	baseAddress string
 	token       string

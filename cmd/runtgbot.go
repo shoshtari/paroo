@@ -46,7 +46,7 @@ func getRepos(config configs.SectionDatabase) (
 		return
 	}
 
-	statsRepo, err2 = postgresRepo.NewMarketStatsRepo(pgconn, ctx)
+	statsRepo, err2 = postgresRepo.NewMarketStatsRepo(ctx, pgconn)
 	if err2 != nil {
 		err = errors.Wrap(err2, "couldn't make stats repo")
 		return

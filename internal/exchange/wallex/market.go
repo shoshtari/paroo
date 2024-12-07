@@ -37,9 +37,6 @@ func (w wallexClientImp) GetMarkets() ([]pkg.Market, error) {
 
 	var markets []pkg.Market
 	for _, symbol := range res.Result.Symbols {
-		if _, exists := avoidingSymbols[symbol.BaseAsset]; exists {
-			continue
-		}
 		market := pkg.Market{
 			ExchangeName: exchangeName,
 			BaseAsset:    symbol.BaseAsset,
@@ -70,9 +67,6 @@ func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 
 	var stats []pkg.MarketStat
 	for _, symbol := range res.Result.Symbols {
-		if _, exists := avoidingSymbols[symbol.BaseAsset]; exists {
-			continue
-		}
 		logger := pkg.GetLogger().With(
 			zap.String("exchange", "wallex"),
 			zap.String("method", "GetMarketStats"),
@@ -93,8 +87,9 @@ func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "couldn't insert market to db")
 		}
+
 		if !market.IsActive {
-			continue
+			logger = logger.WithOptions(zap.IncreaseLevel(zap.PanicLevel))
 		}
 
 		buyprice, err := decimal.NewFromString(symbol.Stats.BuyPrice)

@@ -62,7 +62,7 @@ func (m marketStatsRepoImp) GetMarketLastStat(ctx context.Context, marketID int)
 	return stat, err
 }
 
-func NewMarketStatsRepo(pool *pgxpool.Pool, ctx context.Context) (repositories.MarketStatsRepo, error) {
+func NewMarketStatsRepo(ctx context.Context, pool *pgxpool.Pool) (repositories.MarketStatsRepo, error) {
 	ans := marketStatsRepoImp{
 		pool: pool,
 	}
