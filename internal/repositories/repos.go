@@ -22,4 +22,5 @@ type BalanceRepo interface {
 
 type MarketStatsRepo interface {
 	Insert(ctx context.Context, stat pkg.MarketStat) error
+	GetMarketLastStat(ctx context.Context, marketID int) (pkg.MarketStat, error)
 }

@@ -44,6 +44,24 @@ func (m marketStatsRepoImp) Insert(ctx context.Context, stat pkg.MarketStat) err
 
 }
 
+func (m marketStatsRepoImp) GetMarketLastStat(ctx context.Context, marketID int) (pkg.MarketStat, error) {
+	stmt := `
+		SELECT
+			buy_price,
+			sell_price,
+			date
+		FROM market_stats WHERE market_id = $1
+			ORDER BY DATE DESC limit 1
+		`
+
+	stat := pkg.MarketStat{
+		MarketID: marketID,
+	}
+
+	err := m.pool.QueryRow(ctx, stmt, marketID).Scan(&stat.BuyPrice, &stat.SellPrice, &stat.Date)
+	return stat, err
+}
+
 func NewMarketStatsRepo(pool *pgxpool.Pool, ctx context.Context) (repositories.MarketStatsRepo, error) {
 	ans := marketStatsRepoImp{
 		pool: pool,
