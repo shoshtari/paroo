@@ -46,7 +46,7 @@ func getRepos(config configs.SectionDatabase) (
 		return
 	}
 
-	statsRepo, err2 = postgresRepo.NewMarketStatsRepo(pgconn, ctx)
+	statsRepo, err2 = postgresRepo.NewMarketStatsRepo(ctx, pgconn)
 	if err2 != nil {
 		err = errors.Wrap(err2, "couldn't make stats repo")
 		return
@@ -85,12 +85,14 @@ var runtgbotCmd = &cobra.Command{
 			logger.Fatal("couldn't connect to wallex", zap.Error(err))
 		}
 
-		tgbot, err := telegrambot.NewTelegramBot(config.Telegram, logger.With(zap.String("package", "telegram bot")))
+		tgbot, err := telegrambot.NewTelegramBot(config.Telegram, pkg.GetLogger("telegram_bot").With(zap.String("package", "telegram bot")))
 		if err != nil {
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}
 
-		parooCore := core.NewParooCore(tgbot, wallexClient, balanceRepo, statsRepo)
+		priceManager := core.NewPriceManager(statsRepo, logger.With(zap.String("module", "price manager")))
+		parooCore := core.NewParooCore(tgbot, wallexClient, balanceRepo, marketsRepo,
+			statsRepo, priceManager)
 
 		logger.Info("All dependencies initialized, starting the core")
 		if err := parooCore.Start(); err != nil {

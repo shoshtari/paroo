@@ -50,6 +50,8 @@ func (t TelegramBotImp) getUpdates() (<-chan TelegramUpdate, <-chan error) {
 			url := t.getUrl("getUpdates")
 			url = fmt.Sprintf("%v?offset=%d&timeout=%d", url, t.lastRecievedUpdateID, t.getUpdateTimeout)
 			err := pkg.SendHTTPRequest(t.httpClient, url, nil, &res)
+			logger.WithLazy().With(zap.Any("response", res)).Debug("got updates from telegram")
+
 			if err != nil {
 				errChan <- err
 			}

@@ -14,7 +14,7 @@ import (
 
 type GetPriceRequest struct {
 	OrderType     pkg.OrderType
-	marketID      int
+	MarketID      int
 	TimePercision time.Duration // optional
 }
 
@@ -30,10 +30,10 @@ type PriceManagerImp struct {
 
 func (p PriceManagerImp) GetPrice(ctx context.Context, req GetPriceRequest) (decimal.Decimal, error) {
 	if req.TimePercision == 0 {
-
 		req.TimePercision = p.defaultPercision
 	}
-	stat, err := p.statsRepo.GetMarketLastStat(ctx, req.marketID)
+
+	stat, err := p.statsRepo.GetMarketLastStat(ctx, req.MarketID)
 	if err != nil {
 		return decimal.Zero, errors.WithStack(err)
 	}

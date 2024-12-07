@@ -29,10 +29,6 @@ func (w wallexClientImp) GetPortFolio() (pkg.PortFolio, error) {
 	}
 
 	for _, asset := range wallexRes.Result {
-		if _, exists := avoidingSymbols[asset.Symbol]; exists {
-			continue
-		}
-
 		if asset.Total.Equal(decimal.Zero) {
 			continue
 		}
