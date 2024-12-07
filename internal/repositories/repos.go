@@ -11,7 +11,7 @@ import (
 type MarketRepo interface {
 	GetOrCreate(context.Context, pkg.Market) (int, bool, error)
 	GetByID(context.Context, int) (pkg.Market, error)
-	GetByExchangeAndAsset(context.Context, string, string, string) (pkg.Market, error)
+	GetByExchangeAndAsset(ctx context.Context, exchange, baseAsset, quoteAsset string) (pkg.Market, error)
 	GetAllExchangeMarkets(ctx context.Context, exchangeName string) ([]pkg.Market, error)
 }
 

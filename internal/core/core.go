@@ -18,8 +18,11 @@ type UpdateHandler struct {
 }
 type ParooCoreImp struct {
 	tgbot        telegrambot.TelegramBot
+	priceManager PriceManager
+
 	wallexClient exchange.Exchange
 	balanceRepo  repositories.BalanceRepo
+	marketsRepo  repositories.MarketRepo
 	statRepo     repositories.MarketStatsRepo
 
 	handlers   [][]UpdateHandler
@@ -78,10 +81,16 @@ func (p ParooCoreImp) Start() error {
 	}
 }
 
-func NewParooCore(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange, balanceRepo repositories.BalanceRepo, statsRepo repositories.MarketStatsRepo) ParooCore {
+func NewParooCore(
+	tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange,
+	balanceRepo repositories.BalanceRepo, marketRepo repositories.MarketRepo, statsRepo repositories.MarketStatsRepo,
+	priceManager PriceManager,
+) ParooCore {
 	ans := ParooCoreImp{
 		tgbot:        tgbot,
+		priceManager: priceManager,
 		wallexClient: wallexClient,
+		marketsRepo:  marketRepo,
 		balanceRepo:  balanceRepo,
 		statRepo:     statsRepo,
 	}
