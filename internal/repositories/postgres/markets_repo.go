@@ -23,9 +23,9 @@ func (m marketsRepoImp) migrate(ctx context.Context) error {
 			UNIQUE(exchange_name, base_asset, quote_asset)
 		)
 		`,
-		`ALTER TABLE markets ADD en_name varchar(50)`,
-		`ALTER TABLE markets ADD fa_name varchar(50)`,
-		`ALTER TABLE markets ADD is_active bool DEFAULT FALSE`,
+		`ALTER TABLE markets ADD COLUMN IF NOT EXISTS en_name varchar(50)`,
+		`ALTER TABLE markets ADD COLUMN IF NOT EXISTS fa_name varchar(50)`,
+		`ALTER TABLE markets ADD COLUMN IF NOT EXISTS is_active bool DEFAULT FALSE`,
 	}
 	for _, stmt := range stmts {
 		if _, err := m.pool.Exec(ctx, stmt); err != nil {
