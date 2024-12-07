@@ -18,7 +18,10 @@ func (p ParooCoreImp) getStatDaemon() {
 		wg.Go(p.getMarketStat)
 		wg.Go(p.getWalletStat)
 		if err := wg.Wait(); err != nil {
-			panic(err)
+			pkg.GetLogger().With(
+				zap.String("module", "stat_puller"),
+				zap.Error(err),
+			).Panic("got error from waitgroup")
 		}
 	}
 }

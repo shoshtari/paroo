@@ -125,7 +125,7 @@ var runtgbotCmd = &cobra.Command{
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}
 
-		parooCore := core.NewParooCode(tgbot, wallexClient, balanceRepo, statsRepo)
+		parooCore := core.NewParooCore(tgbot, wallexClient, balanceRepo, statsRepo)
 
 		logger.Info("All dependencies initialized, starting the core")
 		if err := parooCore.Start(); err != nil {

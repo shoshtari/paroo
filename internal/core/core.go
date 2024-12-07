@@ -72,7 +72,7 @@ func (p ParooCoreImp) Start() error {
 	}
 }
 
-func NewParooCode(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange, balanceRepo repositories.BalanceRepo, statsRepo repositories.MarketStatsRepo) ParooCore {
+func NewParooCore(tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange, balanceRepo repositories.BalanceRepo, statsRepo repositories.MarketStatsRepo) ParooCore {
 	ans := ParooCoreImp{
 		tgbot:        tgbot,
 		wallexClient: wallexClient,
