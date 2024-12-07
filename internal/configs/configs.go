@@ -34,10 +34,7 @@ type SectionWallex struct {
 }
 
 type SectionDatabase struct {
-	Provider string `mapstructure:"provider"` // in code we check that if any config is present
-	// if provider is presented, it will override and force the code to use that database
 	Postgres SectionPostgres `mapstructure:"postgres"`
-	Sqlite   string          `mapstructure:"sqlite"`
 }
 
 type SectionRedis struct {

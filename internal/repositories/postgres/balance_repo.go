@@ -72,7 +72,7 @@ func (m BalanceRepoImp) Get(ctx context.Context, exchangeName string, start, end
 	return dates, balances, nil
 }
 
-func NewBalanceRepo(pool *pgxpool.Pool, ctx context.Context) (repositories.BalanceRepo, error) {
+func NewBalanceRepo(ctx context.Context, pool *pgxpool.Pool) (repositories.BalanceRepo, error) {
 	ans := BalanceRepoImp{
 		pool: pool,
 	}

@@ -114,7 +114,7 @@ func (m marketsRepoImp) GetByID(ctx context.Context, marketID int) (pkg.Market, 
 	return ans, nil
 }
 
-func NewMarketRepo(pool *pgxpool.Pool, ctx context.Context) (repositories.MarketRepo, error) {
+func NewMarketRepo(ctx context.Context, pool *pgxpool.Pool) (repositories.MarketRepo, error) {
 	ans := marketsRepoImp{
 		pool: pool,
 	}

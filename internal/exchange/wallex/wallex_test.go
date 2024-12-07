@@ -2,32 +2,46 @@ package wallex
 
 import (
 	"context"
-	"database/sql"
 	"os"
 	"testing"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/shoshtari/paroo/internal/configs"
 	"github.com/shoshtari/paroo/internal/exchange"
 	"github.com/shoshtari/paroo/internal/pkg"
-	"github.com/shoshtari/paroo/internal/repositories/sqlite"
+	"github.com/shoshtari/paroo/internal/repositories/postgres"
 	"github.com/shoshtari/paroo/test"
+	"github.com/shoshtari/paroo/test/testcontainer"
 	"github.com/stretchr/testify/assert"
 )
 
 var wallexClient exchange.Exchange
 var config configs.ParooConfig
-var db *sql.DB
+var pool *pgxpool.Pool
 
 func TestMain(m *testing.M) {
 	var err error
 	config = test.GetTestConfig()
 
-	db, err = sqlite.Connect(":memory:")
+	ctx := context.TODO()
+	if pgcontainer, err := testcontainer.InitPostgres(ctx, config.Database.Postgres); err != nil {
+		panic(err)
+	} else {
+		config.Database.Postgres.Host = pgcontainer.Hostname()
+		config.Database.Postgres.Port = uint16(pgcontainer.Port())
+		defer func() {
+			if err := pgcontainer.Terminate(); err != nil {
+				panic(err)
+			}
+		}()
+	}
+
+	pool, err = postgres.ConnectPostgres(ctx, config.Database.Postgres)
 	if err != nil {
 		panic(err)
 	}
 
-	marketRepo, err := sqlite.NewMarketRepo(context.TODO(), db)
+	marketRepo, err := postgres.NewMarketRepo(context.TODO(), pool)
 	if err != nil {
 		panic(err)
 	}
@@ -55,7 +69,7 @@ func TestMarkets(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, markets)
 
-	_, err = db.Exec("UPDATE markets SET is_active = TRUE")
+	_, err = pool.Exec(context.Background(), "UPDATE markets SET is_active = TRUE")
 	assert.Nil(t, err)
 
 	stats, err := wallexClient.GetMarketsStats()

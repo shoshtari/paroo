@@ -15,7 +15,6 @@ import (
 	"github.com/shoshtari/paroo/internal/repositories"
 	postgresRepo "github.com/shoshtari/paroo/internal/repositories/postgres"
 
-	sqliteRepo "github.com/shoshtari/paroo/internal/repositories/sqlite"
 	telegrambot "github.com/shoshtari/paroo/internal/telegram_bot"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
@@ -27,68 +26,32 @@ func getRepos(config configs.SectionDatabase) (
 	statsRepo repositories.MarketStatsRepo,
 	err error) {
 
-	if config.Provider == "" {
-		if config.Postgres.Host != "" {
-			config.Provider = "postgres"
-		} else {
-			config.Provider = "sqlite"
-		}
-	}
-
 	ctx := context.Background()
-	switch config.Provider {
-	case "postgres":
-		pkg.GetLogger().Info("using postgres for db")
-		pgconn, err2 := postgresRepo.ConnectPostgres(ctx, config.Postgres)
-		if err2 != nil {
-			err = errors.Wrap(err2, "couldn't connect to postgres")
-			return
-		}
-
-		marketRepo, err2 = postgresRepo.NewMarketRepo(pgconn, ctx)
-		if err2 != nil {
-			err = errors.Wrap(err2, "couldn't make markets repo")
-			return
-		}
-
-		balanceRepo, err2 = postgresRepo.NewBalanceRepo(pgconn, ctx)
-		if err2 != nil {
-			err = errors.Wrap(err2, "couldn't make balance repo")
-			return
-		}
-
-		statsRepo, err2 = postgresRepo.NewMarketStatsRepo(pgconn, ctx)
-		if err2 != nil {
-			err = errors.Wrap(err2, "couldn't make stats repo")
-			return
-		}
-		return
-
-	case "sqlite":
-		pkg.GetLogger().Info("using sqlite for db")
-
-		db, err2 := sqliteRepo.Connect(config.Sqlite)
-		if err2 != nil {
-			err = err2
-			return
-		}
-
-		marketRepo, err2 = sqliteRepo.NewMarketRepo(ctx, db)
-		if err != nil {
-			err = errors.WithMessage(err2, "couldn't initialize market repo")
-		}
-
-		balanceRepo, err2 = sqliteRepo.NewBalanceRepo(ctx, db)
-		if err != nil {
-			err = errors.WithMessage(err2, "couldn't initialize balance  repo")
-		}
-
-		statsRepo, err2 = sqliteRepo.NewMarketStatsRepo(ctx, db)
-		if err != nil {
-			err = errors.WithMessage(err2, "couldn't initialize stats  repo")
-		}
+	pkg.GetLogger().Info("using postgres for db")
+	pgconn, err2 := postgresRepo.ConnectPostgres(ctx, config.Postgres)
+	if err2 != nil {
+		err = errors.Wrap(err2, "couldn't connect to postgres")
 		return
 	}
+
+	marketRepo, err2 = postgresRepo.NewMarketRepo(ctx, pgconn)
+	if err2 != nil {
+		err = errors.Wrap(err2, "couldn't make markets repo")
+		return
+	}
+
+	balanceRepo, err2 = postgresRepo.NewBalanceRepo(ctx, pgconn)
+	if err2 != nil {
+		err = errors.Wrap(err2, "couldn't make balance repo")
+		return
+	}
+
+	statsRepo, err2 = postgresRepo.NewMarketStatsRepo(pgconn, ctx)
+	if err2 != nil {
+		err = errors.Wrap(err2, "couldn't make stats repo")
+		return
+	}
+
 	return
 
 }
