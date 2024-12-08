@@ -44,7 +44,7 @@ func (m marketsRepoImp) GetByExchangeAndAsset(ctx context.Context, exchange, bas
 	}
 
 	err := m.pool.QueryRow(ctx, `
-		SELECT id, en_name, fa_name is_active FROM markets
+		SELECT id, en_name, fa_name, is_active FROM markets
 			WHERE exchange_name = $1 AND base_asset = $2 AND quote_asset = $3
 	`, exchange, base, quote).Scan(&ans.ID, &ans.EnName, &ans.FaName, &ans.IsActive)
 
