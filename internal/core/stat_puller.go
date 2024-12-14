@@ -37,7 +37,12 @@ func (p ParooCoreImp) getWalletStat() error {
 		ctx := context.TODO()
 		market, err := p.marketsRepo.GetByExchangeAndAsset(ctx, "wallex", asset.Symbol, "TMN")
 		if err != nil {
-			return errors.WithStack(err)
+			pkg.GetLogger().With(
+				zap.String("module", "stat puller"),
+				zap.String("method", "get wallet stat"),
+				zap.Error(err),
+			).Error("couldn't get market from db")
+			continue
 		}
 		if !market.IsActive {
 			continue
