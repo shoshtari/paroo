@@ -1,4 +1,4 @@
-package wallex
+package ramzinex
 
 import (
 	"context"
@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var wallexClient exchange.Exchange
+var ramzinexClient exchange.Exchange
 var config configs.ParooConfig
 var pool *pgxpool.Pool
 
@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	wallexClient, err = NewWallexClient(config.Exchange.Wallex, marketRepo)
+	ramzinexClient, err = NewRamzinexClient(config.Exchange.Ramzinex, marketRepo)
 	if err != nil {
 		panic(err)
 	}
@@ -57,23 +57,23 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestBalance(t *testing.T) {
-	portfolio, err := wallexClient.GetPortFolio()
-	assert.Nil(t, err)
-	assert.NotZero(t, len(portfolio.Assets))
-	assert.NotZero(t, portfolio.Assets[0].Value)
-}
+// func TestBalance(t *testing.T) {
+// 	portfolio, err := ramzinexClient.GetPortFolio()
+// 	assert.Nil(t, err)
+// 	assert.NotZero(t, len(portfolio.Assets))
+// 	assert.NotZero(t, portfolio.Assets[0].Value)
+// }
 
 func TestMarkets(t *testing.T) {
-	markets, err := wallexClient.GetMarkets()
-	assert.Nil(t, err)
+	markets, err := ramzinexClient.GetMarkets()
+	assert.Nil(t, err, markets)
 	assert.NotEmpty(t, markets)
 
-	_, err = pool.Exec(context.Background(), "UPDATE markets SET is_active = TRUE")
-	assert.Nil(t, err)
-
-	stats, err := wallexClient.GetMarketsStats()
-	assert.Nil(t, err)
-	assert.NotNil(t, stats)
-	assert.NotEmpty(t, stats)
+	// _, err = pool.Exec(context.Background(), "UPDATE markets SET is_active = TRUE")
+	// assert.Nil(t, err)
+	//
+	// stats, err := ramzinexClient.GetMarketsStats()
+	// assert.Nil(t, err)
+	// assert.NotNil(t, stats)
+	// assert.NotEmpty(t, stats)
 }

@@ -6,6 +6,14 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+type Exchange struct {
+	ID           int
+	Name         string
+	RialSymbol   string
+	TetherSymbol string
+	CreatedAt    time.Time
+}
+
 type Market struct {
 	ID           int
 	ExchangeName string

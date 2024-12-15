@@ -24,3 +24,8 @@ type MarketStatsRepo interface {
 	Insert(ctx context.Context, stat pkg.MarketStat) error
 	GetMarketLastStat(ctx context.Context, marketID int) (pkg.MarketStat, error)
 }
+
+type ExchangeRepo interface {
+	Insert(ctx context.Context, exchange pkg.Exchange) (int, error)
+	GetByName(context.Context, string) (int, error)
+}

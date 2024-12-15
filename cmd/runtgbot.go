@@ -80,7 +80,7 @@ var runtgbotCmd = &cobra.Command{
 			logger.Fatal("one of repos is nil", zap.Error(err))
 		}
 
-		wallexClient, err := wallex.NewWallexClient(config.Wallex, marketsRepo)
+		wallexClient, err := wallex.NewWallexClient(config.Exchange.Wallex, marketsRepo)
 		if err != nil {
 			logger.Fatal("couldn't connect to wallex", zap.Error(err))
 		}
