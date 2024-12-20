@@ -1,6 +1,9 @@
 package core
 
 import (
+	"context"
+
+	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/exchange"
 	"github.com/shoshtari/paroo/internal/pkg"
 	"github.com/shoshtari/paroo/internal/repositories"
@@ -20,8 +23,10 @@ type ParooCoreImp struct {
 	tgbot        telegrambot.TelegramBot
 	priceManager PriceManager
 
-	wallexClient exchange.Exchange
+	exchanges []exchange.Exchange
+
 	balanceRepo  repositories.BalanceRepo
+	exchangeRepo repositories.ExchangeRepo
 	marketsRepo  repositories.MarketRepo
 	statRepo     repositories.MarketStatsRepo
 
@@ -82,17 +87,28 @@ func (p ParooCoreImp) Start() error {
 }
 
 func NewParooCore(
-	tgbot telegrambot.TelegramBot, wallexClient exchange.Exchange,
+	tgbot telegrambot.TelegramBot, exchanges []exchange.Exchange,
 	balanceRepo repositories.BalanceRepo, marketRepo repositories.MarketRepo, statsRepo repositories.MarketStatsRepo,
-	priceManager PriceManager,
-) ParooCore {
+	priceManager PriceManager, exchageRepo repositories.ExchangeRepo,
+) (ParooCore, error) {
+	if len(exchanges) == 0 {
+		return nil, errors.Wrap(pkg.BadRequestError, "exchanges slice is empty")
+	}
+
+	for _, exchange := range exchanges {
+		if err := exchageRepo.Insert(context.TODO(), exchange.GetExchangeInfo()); err != nil {
+			pkg.GetLogger("core").Error("couldn't insert exchange to db", zap.Error(err))
+			return nil, pkg.InternalError
+		}
+	}
 	ans := ParooCoreImp{
 		tgbot:        tgbot,
 		priceManager: priceManager,
-		wallexClient: wallexClient,
+		exchanges:    exchanges,
 		marketsRepo:  marketRepo,
 		balanceRepo:  balanceRepo,
 		statRepo:     statsRepo,
+		exchangeRepo: exchageRepo,
 	}
 
 	handlers := [][]UpdateHandler{{
@@ -109,5 +125,5 @@ func NewParooCore(
 	}
 	go ans.getStatDaemon()
 
-	return ans
+	return ans, nil
 }

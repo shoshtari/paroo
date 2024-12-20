@@ -26,6 +26,6 @@ type MarketStatsRepo interface {
 }
 
 type ExchangeRepo interface {
-	Insert(ctx context.Context, exchange pkg.Exchange) (int, error)
+	Insert(ctx context.Context, exchange pkg.Exchange) error
 	GetByName(context.Context, string) (int, error)
 }

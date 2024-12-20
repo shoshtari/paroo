@@ -10,6 +10,8 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/configs"
 	"github.com/shoshtari/paroo/internal/core"
+	"github.com/shoshtari/paroo/internal/exchange"
+	"github.com/shoshtari/paroo/internal/exchange/ramzinex"
 	"github.com/shoshtari/paroo/internal/exchange/wallex"
 	"github.com/shoshtari/paroo/internal/pkg"
 	"github.com/shoshtari/paroo/internal/repositories"
@@ -24,6 +26,7 @@ func getRepos(config configs.SectionDatabase) (
 	marketRepo repositories.MarketRepo,
 	balanceRepo repositories.BalanceRepo,
 	statsRepo repositories.MarketStatsRepo,
+	exchangeRepo repositories.ExchangeRepo,
 	err error) {
 
 	ctx := context.Background()
@@ -52,6 +55,12 @@ func getRepos(config configs.SectionDatabase) (
 		return
 	}
 
+	exchangeRepo, err2 = postgresRepo.NewExchangeRepo(ctx, pgconn)
+	if err2 != nil {
+		err = errors.Wrap(err2, "couldn't make exchange repo")
+		return
+	}
+
 	return
 
 }
@@ -72,7 +81,7 @@ var runtgbotCmd = &cobra.Command{
 		}
 
 		logger := pkg.GetLogger()
-		marketsRepo, balanceRepo, statsRepo, err := getRepos(config.Database)
+		marketsRepo, balanceRepo, statsRepo, exchangeRepo, err := getRepos(config.Database)
 		if err != nil {
 			logger.Fatal("couldn't get repos", zap.Error(err))
 		}
@@ -85,14 +94,22 @@ var runtgbotCmd = &cobra.Command{
 			logger.Fatal("couldn't connect to wallex", zap.Error(err))
 		}
 
+		ramzinexClient, err := ramzinex.NewRamzinexClient(config.Exchange.Ramzinex, marketsRepo)
+		if err != nil {
+			logger.Fatal("couldn't connect to ramzinex", zap.Error(err))
+		}
+
 		tgbot, err := telegrambot.NewTelegramBot(config.Telegram, pkg.GetLogger("telegram_bot").With(zap.String("package", "telegram bot")))
 		if err != nil {
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}
 
 		priceManager := core.NewPriceManager(statsRepo, logger.With(zap.String("module", "price manager")))
-		parooCore := core.NewParooCore(tgbot, wallexClient, balanceRepo, marketsRepo,
-			statsRepo, priceManager)
+		parooCore, err := core.NewParooCore(tgbot, []exchange.Exchange{wallexClient, ramzinexClient}, balanceRepo, marketsRepo,
+			statsRepo, priceManager, exchangeRepo)
+		if err != nil {
+			logger.Panic("couldn't initialize core", zap.Error(err))
+		}
 
 		logger.Info("All dependencies initialized, starting the core")
 		if err := parooCore.Start(); err != nil {

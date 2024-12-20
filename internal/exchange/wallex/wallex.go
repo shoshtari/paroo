@@ -33,6 +33,14 @@ func (w wallexClientImp) getProfile() error {
 	return w.sendReq("account/profile", nil, nil, true)
 }
 
+func (w wallexClientImp) GetExchangeInfo() pkg.Exchange {
+	return pkg.Exchange{
+		Name:         exchangeName,
+		RialSymbol:   "TMN",
+		TetherSymbol: "USDT",
+	}
+}
+
 func NewWallexClient(config configs.SectionWallex, marketsRepo repositories.MarketRepo) (exchange.Exchange, error) {
 	if config.Token == "" {
 		return nil, errors.Wrap(pkg.BadRequestError, "token cannot be empty")

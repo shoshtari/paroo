@@ -17,7 +17,7 @@ func (e exchangeRepoImp) GetByName(context.Context, string) (int, error) {
 	panic("unimplemented")
 }
 
-func (e exchangeRepoImp) Insert(ctx context.Context, exchange pkg.Exchange) (int, error) {
+func (e exchangeRepoImp) Insert(ctx context.Context, exchange pkg.Exchange) error {
 	err := e.pool.QueryRow(ctx, `
 	INSERT INTO exchanges(name, rial_symbol, tether_symbol) VALUES(
 		$1, $2, $3
@@ -25,7 +25,7 @@ func (e exchangeRepoImp) Insert(ctx context.Context, exchange pkg.Exchange) (int
 	RETURNING id
 	`, exchange.Name, exchange.RialSymbol, exchange.TetherSymbol).Scan(&exchange.ID)
 
-	return exchange.ID, err
+	return err
 
 }
 

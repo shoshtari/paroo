@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
+	"github.com/shoshtari/paroo/internal/exchange"
 	"github.com/shoshtari/paroo/internal/pkg"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
@@ -15,8 +16,16 @@ import (
 func (p ParooCoreImp) getStatDaemon() {
 	var wg errgroup.Group
 	for range time.NewTicker(time.Second).C {
-		wg.Go(p.getMarketStat)
-		wg.Go(p.getWalletStat)
+		for _, exchange := range p.exchanges {
+			exchange := exchange
+			wg.Go(func() error {
+				return p.getMarketStat(exchange)
+			})
+			wg.Go(func() error {
+				return p.getWalletStat(exchange)
+			})
+		}
+
 		if err := wg.Wait(); err != nil {
 			pkg.GetLogger().With(
 				zap.String("module", "stat_puller"),
@@ -26,8 +35,8 @@ func (p ParooCoreImp) getStatDaemon() {
 	}
 }
 
-func (p ParooCoreImp) getWalletStat() error {
-	portfolio, err := p.wallexClient.GetPortFolio()
+func (p ParooCoreImp) getWalletStat(exchangeClient exchange.Exchange) error {
+	portfolio, err := exchangeClient.GetPortFolio()
 	if err != nil {
 		return errors.Wrap(err, "couldn't get portfolio from wallex")
 	}
@@ -65,14 +74,14 @@ func (p ParooCoreImp) getWalletStat() error {
 
 	return nil
 }
-func (p ParooCoreImp) getMarketStat() error {
+func (p ParooCoreImp) getMarketStat(exchangeClient exchange.Exchange) error {
 	logger := pkg.GetLogger().With(
 		zap.String("package", "core"),
 		zap.String("module", "stat puller"),
 		zap.String("method", "getMarketStat"),
 	)
 
-	stats, err := p.wallexClient.GetMarketsStats()
+	stats, err := exchangeClient.GetMarketsStats()
 	if err != nil {
 		return errors.Wrap(err, "couldn't get market stats from wallex")
 	}

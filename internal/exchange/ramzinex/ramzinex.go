@@ -39,6 +39,14 @@ func (w ramzinexClientImp) sendReq(path string, reqbody any, resbody any, auth b
 	return pkg.SendHTTPRequest(w.httpClient, url, reqbody, resbody)
 }
 
+func (w ramzinexClientImp) GetExchangeInfo() pkg.Exchange {
+	return pkg.Exchange{
+		Name:         exchangeName,
+		RialSymbol:   "irr",
+		TetherSymbol: "usdt",
+	}
+}
+
 func NewRamzinexClient(config configs.SectionRamzinex, marketRepo repositories.MarketRepo) (exchange.Exchange, error) {
 	ans := ramzinexClientImp{
 		baseAddress: config.BaseAddress,
