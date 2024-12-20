@@ -32,7 +32,7 @@ type ramzinexGetPairResponse struct {
 
 func (r ramzinexClientImp) GetMarkets() ([]pkg.Market, error) {
 	var ramzinexRes ramzinexGetPairResponse
-	err := r.sendReq("exchange/api/v2.0/exchange/pairs", nil, &ramzinexRes)
+	err := r.sendReq("exchange/api/v2.0/exchange/pairs", nil, &ramzinexRes, false)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}

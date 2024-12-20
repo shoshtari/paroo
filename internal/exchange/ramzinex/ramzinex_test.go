@@ -57,12 +57,13 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-// func TestBalance(t *testing.T) {
-// 	portfolio, err := ramzinexClient.GetPortFolio()
-// 	assert.Nil(t, err)
-// 	assert.NotZero(t, len(portfolio.Assets))
-// 	assert.NotZero(t, portfolio.Assets[0].Value)
-// }
+func TestBalance(t *testing.T) {
+	portfolio, err := ramzinexClient.GetPortFolio()
+	t.Log(portfolio.Assets)
+	assert.Nil(t, err)
+	assert.NotZero(t, len(portfolio.Assets))
+	assert.NotZero(t, portfolio.Assets[0].Value)
+}
 
 func TestMarkets(t *testing.T) {
 	markets, err := ramzinexClient.GetMarkets()

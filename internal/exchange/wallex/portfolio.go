@@ -20,7 +20,7 @@ func (w wallexClientImp) GetPortFolio() (pkg.PortFolio, error) {
 	var ans pkg.PortFolio
 	ans.ExchangeName = exchangeName
 
-	if err := w.sendReq("account/balances-detail", nil, &wallexRes); err != nil {
+	if err := w.sendReq("account/balances-detail", nil, &wallexRes, true); err != nil {
 		return ans, errors.Wrap(err, "couldn't send request")
 	}
 

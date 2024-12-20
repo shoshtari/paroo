@@ -7,14 +7,20 @@ import (
 	"github.com/shoshtari/paroo/internal/configs"
 	"github.com/shoshtari/paroo/internal/exchange"
 	"github.com/shoshtari/paroo/internal/pkg"
+	"github.com/shoshtari/paroo/internal/pkg/cache"
 	"github.com/shoshtari/paroo/internal/repositories"
 )
+
+type caches struct {
+	currencyIDToName cache.Cache[int, string]
+}
 
 type ramzinexClientImp struct {
 	httpClient  http.Client
 	baseAddress string
 	token       string
 	marketRepo  repositories.MarketRepo
+	caches      caches
 }
 
 const exchangeName = "ramzinex"
@@ -23,13 +29,14 @@ func (r ramzinexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 	panic("unimplemented")
 }
 
-func (r ramzinexClientImp) GetPortFolio() (pkg.PortFolio, error) {
-	panic("unimplemented")
-}
-
-func (w ramzinexClientImp) sendReq(path string, reqbody any, resbody any) error {
+func (w ramzinexClientImp) sendReq(path string, reqbody any, resbody any, auth bool) error {
 	url := fmt.Sprintf("%v/%v", w.baseAddress, path)
-	return pkg.SendHTTPRequest(w.httpClient, url, reqbody, resbody, pkg.WithHeader("Authorization", w.token))
+	if auth {
+		return pkg.SendHTTPRequest(w.httpClient, url, reqbody, resbody,
+			pkg.WithHeader("Authorization", w.token),
+		)
+	}
+	return pkg.SendHTTPRequest(w.httpClient, url, reqbody, resbody)
 }
 
 func NewRamzinexClient(config configs.SectionRamzinex, marketRepo repositories.MarketRepo) (exchange.Exchange, error) {
@@ -37,6 +44,9 @@ func NewRamzinexClient(config configs.SectionRamzinex, marketRepo repositories.M
 		baseAddress: config.BaseAddress,
 		token:       config.Token,
 		marketRepo:  marketRepo,
+		caches: caches{
+			currencyIDToName: cache.NewInmemoryCache[int, string](),
+		},
 	}
 	ans.httpClient.Timeout = config.Timeout
 	return ans, nil
