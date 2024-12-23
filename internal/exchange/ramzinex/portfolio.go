@@ -25,7 +25,12 @@ func (r ramzinexClientImp) GetPortFolio() (pkg.PortFolio, error) {
 	}
 
 	var res []accountDetailResponseItem
-	err := r.sendReq("wallet/api/v1/accounts/detail", nil, &res, true)
+	err := r.sendReq(sendReqRequest{
+		path:    "wallet/api/v1/accounts/detail",
+		reqbody: nil,
+		resbody: &res,
+		auth:    true,
+	})
 	if err != nil {
 		return ans, errors.Wrap(err, "couldn't send request to ramzinex")
 	}

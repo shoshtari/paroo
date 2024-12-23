@@ -31,7 +31,12 @@ func (r ramzinexClientImp) currencyIDToName(currencyID int) (string, error) {
 	}
 
 	var res getCurrencyRes
-	if err := r.sendReq("exchange/api/v2.0/exchange/currencies", nil, &res, false); err != nil {
+	if err := r.sendReq(
+		sendReqRequest{
+			path:    "exchange/api/v2.0/exchange/currencies",
+			reqbody: nil,
+			resbody: &res,
+		}); err != nil {
 		logger.With(zap.Error(err)).Error("couldn't get data from ramzinex")
 	}
 	if res.Status != 0 {

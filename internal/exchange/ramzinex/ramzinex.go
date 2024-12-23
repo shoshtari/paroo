@@ -1,7 +1,6 @@
 package ramzinex
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/shoshtari/paroo/internal/configs"
@@ -13,31 +12,19 @@ import (
 
 type caches struct {
 	currencyIDToName cache.Cache[int, string]
+	pairIDToMarketID cache.Cache[int, int]
 }
 
 type ramzinexClientImp struct {
-	httpClient  http.Client
-	baseAddress string
-	token       string
-	marketRepo  repositories.MarketRepo
-	caches      caches
+	httpClient        http.Client
+	baseAddress       string
+	basePublicAddress string
+	token             string
+	marketRepo        repositories.MarketRepo
+	caches            caches
 }
 
 const exchangeName = "ramzinex"
-
-func (r ramzinexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
-	panic("unimplemented")
-}
-
-func (w ramzinexClientImp) sendReq(path string, reqbody any, resbody any, auth bool) error {
-	url := fmt.Sprintf("%v/%v", w.baseAddress, path)
-	if auth {
-		return pkg.SendHTTPRequest(w.httpClient, url, reqbody, resbody,
-			pkg.WithHeader("Authorization", w.token),
-		)
-	}
-	return pkg.SendHTTPRequest(w.httpClient, url, reqbody, resbody)
-}
 
 func (w ramzinexClientImp) GetExchangeInfo() pkg.Exchange {
 	return pkg.Exchange{
@@ -49,11 +36,13 @@ func (w ramzinexClientImp) GetExchangeInfo() pkg.Exchange {
 
 func NewRamzinexClient(config configs.SectionRamzinex, marketRepo repositories.MarketRepo) (exchange.Exchange, error) {
 	ans := ramzinexClientImp{
-		baseAddress: config.BaseAddress,
-		token:       config.Token,
-		marketRepo:  marketRepo,
+		baseAddress:       config.BaseAddress,
+		basePublicAddress: config.BasePublicAddress,
+		token:             config.Token,
+		marketRepo:        marketRepo,
 		caches: caches{
 			currencyIDToName: cache.NewInmemoryCache[int, string](),
+			pairIDToMarketID: cache.NewInmemoryCache[int, int](),
 		},
 	}
 	ans.httpClient.Timeout = config.Timeout

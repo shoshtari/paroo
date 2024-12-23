@@ -3,6 +3,8 @@
 - multiple user
 - add exchange and currency entity into datamodel
 - add daily price charts
+- add test for core
+- add integration test
 
 # Doing tasks
 

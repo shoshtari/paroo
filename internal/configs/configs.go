@@ -40,9 +40,10 @@ type SectionWallex struct {
 }
 
 type SectionRamzinex struct {
-	BaseAddress string        `mapstructure:"base_address"`
-	Token       string        `mapstructure:"token"`
-	Timeout     time.Duration `mapstructure:"timeout"`
+	BaseAddress       string        `mapstructure:"base_address"`
+	BasePublicAddress string        `mapstructure:"base_public_address"`
+	Token             string        `mapstructure:"token"`
+	Timeout           time.Duration `mapstructure:"timeout"`
 }
 
 type SectionDatabase struct {

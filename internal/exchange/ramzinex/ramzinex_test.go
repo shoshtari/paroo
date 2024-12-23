@@ -70,11 +70,11 @@ func TestMarkets(t *testing.T) {
 	assert.Nil(t, err, markets)
 	assert.NotEmpty(t, markets)
 
-	// _, err = pool.Exec(context.Background(), "UPDATE markets SET is_active = TRUE")
-	// assert.Nil(t, err)
-	//
-	// stats, err := ramzinexClient.GetMarketsStats()
-	// assert.Nil(t, err)
-	// assert.NotNil(t, stats)
-	// assert.NotEmpty(t, stats)
+	_, err = pool.Exec(context.Background(), "UPDATE markets SET is_active = TRUE")
+	assert.Nil(t, err)
+
+	stats, err := ramzinexClient.GetMarketsStats()
+	assert.Nil(t, err, stats)
+	assert.NotNil(t, stats)
+	assert.NotEmpty(t, stats)
 }
