@@ -46,7 +46,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	wallexClient, err = NewWallexClient(config.Wallex, marketRepo)
+	wallexClient, err = NewWallexClient(config.Exchange.Wallex, marketRepo)
 	if err != nil {
 		panic(err)
 	}

@@ -1,4 +1,4 @@
-package core
+package ramzinex
 
 import (
 	"context"
@@ -6,26 +6,22 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/shopspring/decimal"
+	"github.com/shoshtari/paroo/internal/configs"
 	"github.com/shoshtari/paroo/internal/exchange"
-	"github.com/shoshtari/paroo/internal/exchange/wallex"
 	"github.com/shoshtari/paroo/internal/pkg"
-	"github.com/shoshtari/paroo/internal/repositories"
 	"github.com/shoshtari/paroo/internal/repositories/postgres"
 	"github.com/shoshtari/paroo/test"
 	"github.com/shoshtari/paroo/test/testcontainer"
 	"github.com/stretchr/testify/assert"
 )
 
+var ramzinexClient exchange.Exchange
+var config configs.ParooConfig
 var pool *pgxpool.Pool
-
-var wallexClient exchange.Exchange
-var marketStatsRepo repositories.MarketStatsRepo
-var priceManager PriceManager
 
 func TestMain(m *testing.M) {
 	var err error
-	config := test.GetTestConfig()
+	config = test.GetTestConfig()
 
 	ctx := context.TODO()
 	if pgcontainer, err := testcontainer.InitPostgres(ctx, config.Database.Postgres); err != nil {
@@ -50,12 +46,7 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	marketStatsRepo, err = postgres.NewMarketStatsRepo(context.TODO(), pool)
-	if err != nil {
-		panic(err)
-	}
-
-	wallexClient, err = wallex.NewWallexClient(config.Exchange.Wallex, marketRepo)
+	ramzinexClient, err = NewRamzinexClient(config.Exchange.Ramzinex, marketRepo)
 	if err != nil {
 		panic(err)
 	}
@@ -63,34 +54,27 @@ func TestMain(m *testing.M) {
 	if err := pkg.InitializeLogger(config.Log); err != nil {
 		panic(err)
 	}
-	priceManager = NewPriceManager(marketStatsRepo, pkg.GetLogger("test"))
 	os.Exit(m.Run())
 }
 
-func TestGetPrice(t *testing.T) {
-	markets, err := wallexClient.GetMarkets()
+func TestBalance(t *testing.T) {
+	portfolio, err := ramzinexClient.GetPortFolio()
+	t.Log(portfolio.Assets)
 	assert.Nil(t, err)
+	assert.NotZero(t, len(portfolio.Assets))
+	assert.NotZero(t, portfolio.Assets[0].Value)
+}
+
+func TestMarkets(t *testing.T) {
+	markets, err := ramzinexClient.GetMarkets()
+	assert.Nil(t, err, markets)
 	assert.NotEmpty(t, markets)
 
-	_, err = priceManager.GetPrice(context.TODO(), GetPriceRequest{
-		MarketID:  markets[0].ID,
-		OrderType: pkg.SellOrder,
-	})
-	assert.NotNil(t, err)
-
-	stats, err := wallexClient.GetMarketsStats()
+	_, err = pool.Exec(context.Background(), "UPDATE markets SET is_active = TRUE")
 	assert.Nil(t, err)
+
+	stats, err := ramzinexClient.GetMarketsStats()
+	assert.Nil(t, err, stats)
 	assert.NotNil(t, stats)
 	assert.NotEmpty(t, stats)
-	for _, stat := range stats {
-		err = marketStatsRepo.Insert(context.TODO(), stat)
-		assert.Nil(t, err)
-	}
-
-	price, err := priceManager.GetPrice(context.TODO(), GetPriceRequest{
-		MarketID:  markets[0].ID,
-		OrderType: pkg.SellOrder,
-	})
-	assert.Nil(t, err)
-	assert.False(t, price.Equal(decimal.Zero))
 }

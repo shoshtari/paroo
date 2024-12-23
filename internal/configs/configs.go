@@ -39,6 +39,13 @@ type SectionWallex struct {
 	Timeout     time.Duration `mapstructure:"timeout"`
 }
 
+type SectionRamzinex struct {
+	BaseAddress       string        `mapstructure:"base_address"`
+	BasePublicAddress string        `mapstructure:"base_public_address"`
+	Token             string        `mapstructure:"token"`
+	Timeout           time.Duration `mapstructure:"timeout"`
+}
+
 type SectionDatabase struct {
 	Postgres SectionPostgres `mapstructure:"postgres"`
 }
@@ -65,8 +72,13 @@ type ParooConfig struct {
 	Log        SectionLog        `mapstructure:"log"`
 	HTTPServer SectionHTTPServer `mapstructure:"http_server"`
 	Telegram   SectionTelegram   `mapstructure:"telegram"`
-	Wallex     SectionWallex     `mapstructure:"wallex"`
+	Exchange   SectionExchange   `mapstructure:"exchange"`
 	Database   SectionDatabase   `mapstructure:"database"`
+}
+
+type SectionExchange struct {
+	Wallex   SectionWallex   `mapstructure:"wallex"`
+	Ramzinex SectionRamzinex `mapstructure:"ramzinex"`
 }
 
 func bindEnv(typ reflect.Type, parentpath string) error {

@@ -28,7 +28,7 @@ type ListMarketStatsResponse struct {
 
 func (w wallexClientImp) GetMarkets() ([]pkg.Market, error) {
 	var res ListMarketStatsResponse
-	if err := w.sendReq("markets", nil, &res); err != nil {
+	if err := w.sendReq("markets", nil, &res, false); err != nil {
 		return nil, errors.Wrap(err, "couldn't send request")
 	}
 	if !res.Success {
@@ -58,7 +58,7 @@ func (w wallexClientImp) GetMarkets() ([]pkg.Market, error) {
 
 func (w wallexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 	var res ListMarketStatsResponse
-	if err := w.sendReq("markets", nil, &res); err != nil {
+	if err := w.sendReq("markets", nil, &res, false); err != nil {
 		return nil, errors.Wrap(err, "couldn't send request")
 	}
 	if !res.Success {
