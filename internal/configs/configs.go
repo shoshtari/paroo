@@ -48,6 +48,7 @@ type SectionRamzinex struct {
 
 type SectionDatabase struct {
 	Postgres SectionPostgres `mapstructure:"postgres"`
+	Redis    SectionRedis    `mapstructure:"redis"`
 }
 
 type SectionRedis struct {

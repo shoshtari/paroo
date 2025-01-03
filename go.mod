@@ -14,6 +14,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.34.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.34.0
+	github.com/testcontainers/testcontainers-go/modules/redis v0.34.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/sync v0.8.0
 )
