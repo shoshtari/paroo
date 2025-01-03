@@ -44,3 +44,29 @@ func TestRedisCache(t *testing.T) {
 	assert.NotNil(t, err)
 
 }
+
+func TestRedisCacheWithCustomDataStructure(t *testing.T) {
+	type TestStruct struct {
+		Name string
+		Age  int
+	}
+
+	r, err := NewRedisCache[TestStruct](config.Database.Redis)
+	assert.Nil(t, err)
+
+	testStruct := TestStruct{
+		Name: "test",
+		Age:  10,
+	}
+
+	err = r.Set("test", testStruct)
+	assert.Nil(t, err)
+
+	val, err := r.Get("test")
+	assert.Nil(t, err)
+	assert.Equal(t, val.Name, testStruct.Name)
+	assert.Equal(t, val.Age, testStruct.Age)
+
+	err = r.Delete("test")
+	assert.Nil(t, err)
+}
