@@ -21,7 +21,8 @@ func (e exchangeRepoImp) Insert(ctx context.Context, exchange pkg.Exchange) erro
 	err := e.pool.QueryRow(ctx, `
 	INSERT INTO exchanges(name, rial_symbol, tether_symbol) VALUES(
 		$1, $2, $3
-	), ON CONFLICT(name) DO UPDATE SET name = name
+	)
+	ON CONFLICT(name) DO UPDATE SET name = exchanges.name
 	RETURNING id
 	`, exchange.Name, exchange.RialSymbol, exchange.TetherSymbol).Scan(&exchange.ID)
 
@@ -36,7 +37,7 @@ func (m exchangeRepoImp) migrate(ctx context.Context) error {
 			name varchar(50) UNIQUE,
 			rial_symbol varchar(50),
 			tether_symbol varchar(50),
-			created_at TIMESTAMP DEFAULT NOW(),
+			created_at TIMESTAMP DEFAULT NOW()
 		)
 		`,
 	}

@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/pkg/errors"
 	"github.com/shoshtari/paroo/internal/pkg"
@@ -47,6 +48,11 @@ func (m marketsRepoImp) GetByExchangeAndAsset(ctx context.Context, exchange, bas
 		SELECT id, en_name, fa_name, is_active FROM markets
 			WHERE exchange_name = $1 AND base_asset = $2 AND quote_asset = $3
 	`, exchange, base, quote).Scan(&ans.ID, &ans.EnName, &ans.FaName, &ans.IsActive)
+
+	// check for no row in result set
+	if errors.As(err, &pgx.ErrNoRows) {
+		return ans, pkg.NotFoundError
+	}
 
 	if err != nil {
 		return ans, errors.Wrap(err, "couldn't insert into markets")

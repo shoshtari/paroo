@@ -61,7 +61,7 @@ func (r ramzinexClientImp) GetMarketsStats() ([]pkg.MarketStat, error) {
 		}
 		marketID, err := r.getMarketIDFromPairID(pairID)
 		if err != nil {
-			pkg.GetLogger().Error("couldn't get market id from pair id", zap.Error(err))
+			pkg.GetLogger().Error("couldn't get market id from pair id", zap.Error(err), zap.Int("pair_id", pairID))
 			continue
 		}
 

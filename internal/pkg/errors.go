@@ -7,4 +7,5 @@ var (
 	UnknownMethodError  = errors.New("method is unknown")
 	InternalError       = errors.New("internal error")
 	NotImplementedError = errors.New("unimplemented")
+	NotFoundError       = errors.New("not found")
 )

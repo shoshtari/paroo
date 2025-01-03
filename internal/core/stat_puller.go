@@ -45,6 +45,10 @@ func (p ParooCoreImp) getWalletStat(exchangeClient exchange.Exchange) error {
 	for _, asset := range portfolio.Assets {
 		ctx := context.TODO()
 		market, err := p.marketsRepo.GetByExchangeAndAsset(ctx, "wallex", asset.Symbol, "TMN")
+		if errors.Is(err, pkg.NotFoundError) {
+			continue
+		}
+
 		if err != nil {
 			pkg.GetLogger().With(
 				zap.String("module", "stat puller"),

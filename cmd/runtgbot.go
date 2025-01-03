@@ -88,6 +88,7 @@ var runtgbotCmd = &cobra.Command{
 		if marketsRepo == nil || balanceRepo == nil || statsRepo == nil {
 			logger.Fatal("one of repos is nil", zap.Error(err))
 		}
+		logger.Info("all repos initialized")
 
 		wallexClient, err := wallex.NewWallexClient(config.Exchange.Wallex, marketsRepo)
 		if err != nil {
@@ -98,11 +99,13 @@ var runtgbotCmd = &cobra.Command{
 		if err != nil {
 			logger.Fatal("couldn't connect to ramzinex", zap.Error(err))
 		}
+		logger.Info("all exchanges connected")
 
 		tgbot, err := telegrambot.NewTelegramBot(config.Telegram, pkg.GetLogger("telegram_bot").With(zap.String("package", "telegram bot")))
 		if err != nil {
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}
+		logger.Info("telegram bot initialized")
 
 		priceManager := core.NewPriceManager(statsRepo, logger.With(zap.String("module", "price manager")))
 		parooCore, err := core.NewParooCore(tgbot, []exchange.Exchange{wallexClient, ramzinexClient}, balanceRepo, marketsRepo,
