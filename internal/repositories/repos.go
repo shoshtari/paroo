@@ -16,8 +16,7 @@ type MarketRepo interface {
 }
 
 type BalanceRepo interface {
-	Insert(ctx context.Context, changeName string, date time.Time, balance decimal.Decimal) error
-	Get(ctx context.Context, exchangeName string, start, date time.Time) ([]time.Time, []decimal.Decimal, error)
+	Insert(ctx context.Context, changeName string, userID int, date time.Time, balance decimal.Decimal) error
 }
 
 type MarketStatsRepo interface {
@@ -28,4 +27,9 @@ type MarketStatsRepo interface {
 type ExchangeRepo interface {
 	Insert(ctx context.Context, exchange pkg.Exchange) error
 	GetByName(context.Context, string) (int, error)
+}
+
+type UserRepo interface {
+	GetOrCreate(ctx context.Context, user pkg.User) (pkg.User, error)
+	GetAll(ctx context.Context) ([]pkg.User, error)
 }

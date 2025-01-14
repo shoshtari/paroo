@@ -27,6 +27,7 @@ func getRepos(config configs.SectionDatabase) (
 	balanceRepo repositories.BalanceRepo,
 	statsRepo repositories.MarketStatsRepo,
 	exchangeRepo repositories.ExchangeRepo,
+	userRepo repositories.UserRepo,
 	err error) {
 
 	ctx := context.Background()
@@ -61,6 +62,12 @@ func getRepos(config configs.SectionDatabase) (
 		return
 	}
 
+	userRepo, err2 = postgresRepo.NewUserRepo(ctx, pgconn)
+	if err2 != nil {
+		err = errors.Wrap(err2, "couldn't make exchange repo")
+		return
+	}
+
 	return
 
 }
@@ -81,7 +88,8 @@ var runtgbotCmd = &cobra.Command{
 		}
 
 		logger := pkg.GetLogger()
-		marketsRepo, balanceRepo, statsRepo, exchangeRepo, err := getRepos(config.Database)
+		marketsRepo, balanceRepo, statsRepo, exchangeRepo, userRepo, err := getRepos(config.Database)
+
 		if err != nil {
 			logger.Fatal("couldn't get repos", zap.Error(err))
 		}
@@ -101,7 +109,11 @@ var runtgbotCmd = &cobra.Command{
 		}
 		logger.Info("all exchanges connected")
 
-		tgbot, err := telegrambot.NewTelegramBot(config.Telegram, pkg.GetLogger("telegram_bot").With(zap.String("package", "telegram bot")))
+		tgbot, err := telegrambot.NewTelegramBot(
+			config.Telegram,
+			pkg.GetLogger("telegram_bot").With(zap.String("package", "telegram bot")),
+		)
+
 		if err != nil {
 			logger.Panic("couldn't initialize telegram bot", zap.Error(err))
 		}
@@ -109,7 +121,7 @@ var runtgbotCmd = &cobra.Command{
 
 		priceManager := core.NewPriceManager(statsRepo, logger.With(zap.String("module", "price manager")))
 		parooCore, err := core.NewParooCore(tgbot, []exchange.Exchange{wallexClient, ramzinexClient}, balanceRepo, marketsRepo,
-			statsRepo, priceManager, exchangeRepo)
+			statsRepo, priceManager, exchangeRepo, userRepo)
 		if err != nil {
 			logger.Panic("couldn't initialize core", zap.Error(err))
 		}

@@ -29,6 +29,7 @@ type ParooCoreImp struct {
 	exchangeRepo repositories.ExchangeRepo
 	marketsRepo  repositories.MarketRepo
 	statRepo     repositories.MarketStatsRepo
+	userRepo     repositories.UserRepo
 
 	handlers   [][]UpdateHandler
 	handlerMap map[string]UpdateHandler
@@ -89,7 +90,7 @@ func (p ParooCoreImp) Start() error {
 func NewParooCore(
 	tgbot telegrambot.TelegramBot, exchanges []exchange.Exchange,
 	balanceRepo repositories.BalanceRepo, marketRepo repositories.MarketRepo, statsRepo repositories.MarketStatsRepo,
-	priceManager PriceManager, exchageRepo repositories.ExchangeRepo,
+	priceManager PriceManager, exchageRepo repositories.ExchangeRepo, userRepo repositories.UserRepo,
 ) (ParooCore, error) {
 	if len(exchanges) == 0 {
 		return nil, errors.Wrap(pkg.BadRequestError, "exchanges slice is empty")
@@ -109,6 +110,7 @@ func NewParooCore(
 		balanceRepo:  balanceRepo,
 		statRepo:     statsRepo,
 		exchangeRepo: exchageRepo,
+		userRepo:     userRepo,
 	}
 
 	handlers := [][]UpdateHandler{{
