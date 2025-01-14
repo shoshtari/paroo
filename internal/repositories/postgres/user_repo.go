@@ -16,7 +16,7 @@ type UserRepoImp struct {
 func (m UserRepoImp) migrate(ctx context.Context) error {
 	stmt := `
 		CREATE TABLE IF NOT EXISTS users(
-			telegram_id int UNIQUE NOT NULL,
+			telegram_id int PRIMARY KEY,
 			telegram_username TEXT,
 			wallex_token TEXT DEFAULT NULL,
 			ramzinex_token TEXT DEFAULT NULL,

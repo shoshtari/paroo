@@ -18,9 +18,12 @@ func (m BalanceRepoImp) migrate(ctx context.Context) error {
 	stmt := `
 		CREATE TABLE IF NOT EXISTS balances(
 			exchange_name varchar(50),
+			user_id INT,
 			date TIMESTAMP,
 			balance TEXT,
-			PRIMARY KEY(exchange_name, date)
+			PRIMARY KEY(exchange_name, date),
+			FOREIGN KEY (exchange_name) REFERENCES exchanges(name),
+			FOREIGN KEY (user_id) REFERENCES users(id)
 		)
 		`
 	_, err := m.pool.Exec(ctx, stmt)
@@ -28,7 +31,7 @@ func (m BalanceRepoImp) migrate(ctx context.Context) error {
 
 }
 
-func (m BalanceRepoImp) Insert(ctx context.Context, exchangeName string, date time.Time, balance decimal.Decimal) error {
+func (m BalanceRepoImp) Insert(ctx context.Context, exchangeName string, userID int, date time.Time, balance decimal.Decimal) error {
 	stmt := `
 		INSERT INTO balances(
 			exchange_name,

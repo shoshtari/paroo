@@ -87,7 +87,7 @@ func (p ParooCoreImp) getWalletStatForUser(exchangeClient exchange.Exchange, use
 		balance = balance.Add(asset.Value.Mul(price))
 
 	}
-	if err := p.balanceRepo.Insert(context.TODO(), "wallex", time.Now(), balance); err != nil {
+	if err := p.balanceRepo.Insert(context.TODO(), exchangeClient.GetExchangeInfo().Name, user.TelegramID, time.Now(), balance); err != nil {
 		return errors.WithStack(err)
 	}
 
