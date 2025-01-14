@@ -1,0 +1,36 @@
+name: test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+
+    outputs:
+      version: ${{ steps.detect_version.outputs.version }}
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.2'
+
+      - name: get dependencies
+        run: go mod download
+
+      - name: run tests
+        run: go test ./...
