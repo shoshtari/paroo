@@ -29,3 +29,8 @@ type ExchangeRepo interface {
 	Insert(ctx context.Context, exchange pkg.Exchange) error
 	GetByName(context.Context, string) (int, error)
 }
+
+type UserRepo interface {
+	GetOrCreate(ctx context.Context, user pkg.User) (pkg.User, error)
+	GetAll(ctx context.Context) ([]pkg.User, error)
+}

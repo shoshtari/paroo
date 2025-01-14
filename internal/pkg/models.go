@@ -75,3 +75,12 @@ type BalanceInTime struct {
 	Time  time.Time
 	Value decimal.Decimal
 }
+
+type User struct {
+	TelegramID       int
+	TelegramUsername string
+	WallexToken      string
+	RamzinexToken    string
+	CreatedAt        time.Time
+	DeletedAt        *time.Time
+}

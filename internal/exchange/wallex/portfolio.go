@@ -15,12 +15,12 @@ type BalanceDetailResponse struct {
 	} `json:"result"`
 }
 
-func (w wallexClientImp) GetPortFolio() (pkg.PortFolio, error) {
+func (w wallexClientImp) GetPortFolio(user pkg.User) (pkg.PortFolio, error) {
 	var wallexRes BalanceDetailResponse
 	var ans pkg.PortFolio
 	ans.ExchangeName = exchangeName
 
-	if err := w.sendReq("account/balances-detail", nil, &wallexRes, true); err != nil {
+	if err := w.sendReq("account/balances-detail", nil, &wallexRes, user.WallexToken); err != nil {
 		return ans, errors.Wrap(err, "couldn't send request")
 	}
 

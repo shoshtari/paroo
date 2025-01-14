@@ -11,7 +11,7 @@ type sendReqRequest struct {
 	reqbody any
 	resbody any
 	// optionals
-	auth         bool
+	auth         string
 	usePublicApi bool
 }
 
@@ -22,7 +22,7 @@ func (w ramzinexClientImp) sendReq(r sendReqRequest) error {
 	} else {
 		url = fmt.Sprintf("%v/%v", w.baseAddress, r.path)
 	}
-	if r.auth {
+	if r.auth != "" {
 		return pkg.SendHTTPRequest(w.httpClient, url, r.reqbody, r.resbody,
 			pkg.WithHeader("Authorization", w.token),
 		)

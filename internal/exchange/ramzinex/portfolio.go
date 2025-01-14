@@ -19,7 +19,7 @@ type accountDetailResponseItem struct {
 	} `json:"balances"`
 }
 
-func (r ramzinexClientImp) GetPortFolio() (pkg.PortFolio, error) {
+func (r ramzinexClientImp) GetPortFolio(user pkg.User) (pkg.PortFolio, error) {
 	ans := pkg.PortFolio{
 		ExchangeName: exchangeName,
 	}
@@ -29,7 +29,7 @@ func (r ramzinexClientImp) GetPortFolio() (pkg.PortFolio, error) {
 		path:    "wallet/api/v1/accounts/detail",
 		reqbody: nil,
 		resbody: &res,
-		auth:    true,
+		auth:    user.RamzinexToken,
 	})
 	if err != nil {
 		return ans, errors.Wrap(err, "couldn't send request to ramzinex")

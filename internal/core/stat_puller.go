@@ -36,7 +36,22 @@ func (p ParooCoreImp) getStatDaemon() {
 }
 
 func (p ParooCoreImp) getWalletStat(exchangeClient exchange.Exchange) error {
-	portfolio, err := exchangeClient.GetPortFolio()
+	users, err := p.userRepo.GetAll(context.TODO())
+	if err != nil {
+		return errors.WithStack(err)
+	}
+	var wg errgroup.Group
+	for _, user := range users {
+		user := user
+		wg.Go(func() error {
+			return p.getWalletStatForUser(exchangeClient, user)
+		})
+	}
+	return errors.WithStack(wg.Wait())
+
+}
+func (p ParooCoreImp) getWalletStatForUser(exchangeClient exchange.Exchange, user pkg.User) error {
+	portfolio, err := exchangeClient.GetPortFolio(user)
 	if err != nil {
 		return errors.Wrap(err, "couldn't get portfolio from wallex")
 	}

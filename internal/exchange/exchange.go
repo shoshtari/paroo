@@ -5,7 +5,7 @@ import (
 )
 
 type Exchange interface {
-	GetPortFolio() (pkg.PortFolio, error)
+	GetPortFolio(user pkg.User) (pkg.PortFolio, error)
 	GetMarkets() ([]pkg.Market, error)
 	GetMarketsStats() ([]pkg.MarketStat, error)
 	GetExchangeInfo() pkg.Exchange
